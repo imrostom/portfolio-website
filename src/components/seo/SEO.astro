@@ -1,0 +1,97 @@
+---
+import { site, verification } from '../../data/site';
+import { ogCardFor, ogCardPath } from '../../data/ogCards';
+import { personSchema, websiteSchema } from '../../utils/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Absolute path, e.g. `/projects`. Defaults to the current route. */
+  path?: string;
+  image?: string;
+  /** OpenGraph type — `profile` for the about/résumé pages. */
+  type?: 'website' | 'article' | 'profile';
+  /** Extra JSON-LD nodes appended after the Person and WebSite graph. */
+  schemas?: Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  path,
+  image,
+  type = 'website',
+  schemas = [],
+  noindex = false,
+} = Astro.props;
+
+// `Astro.site` is the configured origin; falling back to the request URL keeps
+// this working in `astro dev` before a `site` is set.
+const origin = Astro.site ?? new URL(Astro.url.origin);
+const canonical = new URL(path ?? Astro.url.pathname, origin);
+// Normalise away any trailing slash so canonicals never differ by one character.
+/*
+  `build.format: 'file'` emits `projects.html`, so during the static build
+  `Astro.url.pathname` is `/projects.html`. Left alone, the canonical said
+  `/projects.html` while the sitemap said `/projects` — two URLs for one page,
+  which splits the signal. Strip the extension and any trailing slash.
+*/
+canonical.pathname = canonical.pathname.replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+
+/*
+  Card resolution: an explicit `image` prop wins, then this page's own OG card,
+  then the shared default. Keying on the canonical pathname means pages need no
+  wiring — adding a card to ogCards.ts is enough.
+*/
+const card = ogCardFor(canonical.pathname);
+const resolvedImage = image ?? (card ? ogCardPath(card) : site.ogImage);
+const ogImage = new URL(resolvedImage, origin);
+const imageAlt = card?.alt ?? `${site.name} — ${site.role}`;
+const fullTitle = title === site.name ? `${site.name} — ${site.role}` : `${title} — ${site.name}`;
+
+const graph = [personSchema(origin), websiteSchema(origin), ...schemas];
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+
+<meta name="author" content={site.name} />
+<meta
+  name="robots"
+  content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'}
+/>
+
+{
+  /* Search Console / Webmaster Tools. Emits nothing while unset — an empty
+    content="" fails verification and looks like a broken tag. */
+}
+{verification.google && <meta name="google-site-verification" content={verification.google} />}
+{verification.bing && <meta name="msvalidate.01" content={verification.bing} />}
+
+{/* OpenGraph */}
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:locale" content={site.locale} />
+<meta property="og:image" content={ogImage.href} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imageAlt} />
+
+{/* Twitter / X */}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage.href} />
+<meta name="twitter:image:alt" content={imageAlt} />
+
+{/* Structured data */}
+{
+  graph.map((schema) => (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  ))
+}

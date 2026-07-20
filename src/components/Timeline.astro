@@ -1,0 +1,48 @@
+---
+import { cn } from '../utils/cn';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+{
+  /*
+  Vertical rail shared by the about, experience and résumé timelines.
+  The rail is drawn on the wrapper so individual entries stay independent,
+  and it fades out at both ends rather than stopping abruptly.
+*/
+}
+<ol class={cn('timeline relative', className)} data-reveal-group="120">
+  <slot />
+</ol>
+
+<style>
+  .timeline {
+    --rail-x: 0.9375rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: var(--rail-x);
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--border-strong) 8%,
+      var(--border-strong) 92%,
+      transparent
+    );
+  }
+
+  @media (min-width: 768px) {
+    .timeline {
+      --rail-x: 1.25rem;
+    }
+  }
+</style>

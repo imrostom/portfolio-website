@@ -1,0 +1,233 @@
+---
+import { Icon } from 'astro-icon/components';
+import { site, contact } from '../../data/site';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import Portrait from '../../components/Portrait.astro';
+
+/** Phrases cycled by the typewriter. The first is rendered server-side. */
+const roles = [
+  'Senior Full Stack Engineer',
+  'SaaS Platform Architect',
+  'Node.js & Laravel Specialist',
+  'AI Integration Engineer',
+];
+---
+
+{
+  /*
+  Full-viewport hero. `<main>` already offsets the fixed header (pt-16 / lg:pt-18),
+  so the header height is subtracted here to land on exactly one screen rather
+  than one screen plus a header.
+
+  `svh` rather than `dvh`: on mobile, `dvh` re-resolves as the browser chrome
+  hides and shows, which visibly reflows the hero mid-scroll. `svh` is the
+  stable small-viewport value, so the layout is computed once and everything
+  is guaranteed to fit even with the toolbars visible.
+*/
+}
+<section
+  class="hero relative flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden lg:min-h-[calc(100svh-4.5rem)]"
+>
+  <div class="hero__spotlight" aria-hidden="true"></div>
+  <div class="hero__grain" aria-hidden="true"></div>
+
+  <div class="container-page relative flex flex-1 items-center py-10 sm:py-12">
+    <div class="grid w-full items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
+      {/* Copy */}
+      <div class="flex flex-col items-start">
+        <Badge variant="success" pulse data-reveal="fade">
+          {contact.availability}
+        </Badge>
+
+        <h1
+          class="mt-5 text-3xl leading-[1.06] font-semibold sm:text-4xl lg:text-5xl xl:text-6xl"
+          data-reveal="blur"
+          style="--reveal-delay:60ms"
+        >
+          <span class="block text-text-muted text-lg font-medium tracking-normal sm:text-xl">
+            Hi, I'm
+          </span>
+          <span class="text-gradient mt-1 block">{site.name}</span>
+        </h1>
+
+        {/* Typewriter. The first phrase is in the HTML so the line is never blank. */}
+        <p
+          class="mt-4 flex min-h-[2em] items-center font-display text-lg font-medium sm:text-xl lg:text-2xl"
+          data-typing={JSON.stringify(roles)}
+          data-reveal="slide"
+          style="--reveal-delay:130ms"
+        >
+          <span class="sr-only">{site.role}</span>
+          <span aria-hidden="true" class="text-text"
+            ><span data-typing-output>{roles[0]}</span><span class="typing-caret"></span></span
+          >
+        </p>
+
+        <p
+          class="mt-4 max-w-xl text-[0.95rem] leading-relaxed text-text-muted sm:text-base"
+          data-reveal="slide"
+          style="--reveal-delay:200ms"
+        >
+          {site.tagline}
+        </p>
+
+        <div
+          class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center"
+          data-reveal="slide"
+          style="--reveal-delay:270ms"
+        >
+          <Button href="/resume" size="lg" variant="primary" icon="lucide:file-text" magnetic>
+            View Resume
+          </Button>
+          <Button
+            href="/projects"
+            size="lg"
+            variant="secondary"
+            iconRight="lucide:arrow-right"
+            magnetic
+          >
+            View Projects
+          </Button>
+        </div>
+
+        {/* Quick facts */}
+        <dl
+          class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-sm text-text-muted"
+          data-reveal="fade"
+          style="--reveal-delay:340ms"
+        >
+          <div class="flex items-center gap-2">
+            <Icon name="lucide:map-pin" width={15} height={15} aria-hidden="true" />
+            <dt class="sr-only">Location</dt>
+            <dd>{contact.locationShort}</dd>
+          </div>
+          <div class="flex items-center gap-2">
+            <Icon name="lucide:calendar-days" width={15} height={15} aria-hidden="true" />
+            <dt class="sr-only">Experience</dt>
+            <dd>{site.yearsExperience}+ years experience</dd>
+          </div>
+          <div class="flex items-center gap-2">
+            <Icon name="lucide:clock" width={15} height={15} aria-hidden="true" />
+            <dt class="sr-only">Timezone</dt>
+            <dd>{contact.timezone}</dd>
+          </div>
+        </dl>
+      </div>
+
+      {
+        /*
+        Portrait. Deliberately NOT wrapped in `data-reveal`: that starts at
+        `opacity: 0` and only clears once the deferred bundle runs, which would
+        gate this page's LCP on JavaScript. Its entrance is the rotating ring
+        and the floating badges instead.
+      */
+      }
+      <div class="relative mx-auto w-full max-w-lg lg:max-w-none">
+        <Portrait />
+      </div>
+    </div>
+  </div>
+
+  {/* Scroll cue — pinned to the foot of the viewport-height section. */}
+  <div
+    class="relative flex shrink-0 justify-center pb-7 sm:pb-9"
+    data-reveal="fade"
+    style="--reveal-delay:420ms"
+  >
+    <a
+      href="#stats"
+      class="group/scroll inline-flex flex-col items-center gap-2 rounded-full text-xs tracking-widest text-text-dim uppercase transition-colors hover:text-text"
+    >
+      Scroll
+      <span
+        class="scroll-cue grid h-9 w-5.5 justify-center rounded-full border border-border-strong pt-1.5"
+      >
+        <span class="h-1.5 w-1 rounded-full bg-text-dim"></span>
+      </span>
+    </a>
+  </div>
+</section>
+
+<style>
+  /*
+    Hero ambience.
+
+    The portrait is content and is prioritised accordingly. These two ambience
+    layers are not: a full-bleed raster background would add a large blocking
+    download for decoration alone, competing with the LCP image. Both are
+    generated — one CSS gradient stack and one inline SVG — so they cost zero
+    network requests and cannot shift layout.
+  */
+  .hero__spotlight {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      /* Warm key light behind the copy */
+      radial-gradient(
+        48rem 32rem at 15% 22%,
+        color-mix(in oklab, var(--primary) 14%, transparent),
+        transparent 64%
+      ),
+      /* Cooler fill behind the illustration */
+      radial-gradient(
+          40rem 28rem at 88% 14%,
+          color-mix(in oklab, var(--secondary) 11%, transparent),
+          transparent 62%
+        ),
+      /* Fade the section into whatever follows it, so the full-height block
+         doesn't end on a hard edge */
+      linear-gradient(to bottom, transparent 62%, var(--bg) 100%);
+  }
+
+  /*
+    Fine film grain. `feTurbulence` rendered inline as a data URI — a few hundred
+    bytes, tiled, versus a few hundred KB for an equivalent noise PNG.
+  */
+  .hero__grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.3;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+
+  .typing-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    animation: caret 1s step-end infinite;
+  }
+
+  .scroll-cue > span {
+    animation: scroll-cue 1.8s ease-in-out infinite;
+  }
+
+  @keyframes scroll-cue {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    35% {
+      opacity: 1;
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: translateY(9px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .typing-caret,
+    .scroll-cue > span {
+      animation: none;
+    }
+  }
+</style>

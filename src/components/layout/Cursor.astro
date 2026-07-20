@@ -1,0 +1,84 @@
+---
+/**
+ * Custom cursor: an exact-tracking dot plus a trailing ring that grows over
+ * interactive elements. Hidden on touch devices and under reduced motion
+ * (see global.css), where the native cursor is the right answer.
+ */
+---
+
+<div class="custom-cursor" aria-hidden="true">
+  <div class="custom-cursor__ring"></div>
+  <div class="custom-cursor__dot"></div>
+</div>
+
+<style>
+  .custom-cursor {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .custom-cursor[data-active] {
+    opacity: 1;
+  }
+
+  .custom-cursor__dot,
+  .custom-cursor__ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 9999px;
+    /* Translate is set from JS in page coordinates; the negative margin centres
+       the shape on the pointer without a second transform. */
+    will-change: translate;
+  }
+
+  .custom-cursor__dot {
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    background: var(--primary);
+  }
+
+  .custom-cursor__ring {
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 1.5px solid color-mix(in oklab, var(--primary) 55%, transparent);
+    transition:
+      width 0.28s var(--ease-out-expo),
+      height 0.28s var(--ease-out-expo),
+      margin 0.28s var(--ease-out-expo),
+      background-color 0.28s ease,
+      border-color 0.28s ease;
+  }
+
+  .custom-cursor[data-hover] .custom-cursor__ring {
+    width: 54px;
+    height: 54px;
+    margin: -27px 0 0 -27px;
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    border-color: color-mix(in oklab, var(--primary) 85%, transparent);
+  }
+
+  /* Hide the native cursor only once the replacement is actually running.
+     The `data-custom-cursor` flag is set by pointer.ts after it initialises, so
+     a script failure leaves the normal cursor in place. */
+  @media (hover: hover) and (pointer: fine) {
+    :global(html[data-custom-cursor] body),
+    :global(html[data-custom-cursor] a),
+    :global(html[data-custom-cursor] button),
+    :global(html[data-custom-cursor] [role='button']) {
+      cursor: none;
+    }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .custom-cursor {
+      display: none;
+    }
+  }
+</style>

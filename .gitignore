@@ -1,0 +1,25 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# generated assets (recreated by `npm run generate:assets`)
+# NOTE: public/Md Rostom Ali.pdf is a real CV — committed, never generated.
+public/og.png
+public/icon-512.png
+public/apple-touch-icon.png
+public/og/
+public/portrait.jpg
+
+# logs
+*.log
+npm-debug.log*
+
+# environment
+.env
+.env.production
+
+# macOS
+.DS_Store

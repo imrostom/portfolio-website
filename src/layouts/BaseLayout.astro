@@ -1,0 +1,84 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { Font } from 'astro:assets';
+import { site } from '../data/site';
+import SEO from '../components/seo/SEO.astro';
+import NoScriptFallback from '../components/layout/NoScriptFallback.astro';
+import Backdrop from '../components/layout/Backdrop.astro';
+import Cursor from '../components/layout/Cursor.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import BackToTop from '../components/layout/BackToTop.astro';
+
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  image?: string;
+  type?: 'website' | 'article' | 'profile';
+  schemas?: Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const { title, description, path, image, type, schemas, noindex } = Astro.props;
+---
+
+<!doctype html>
+<html lang={site.lang} class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {/* Light-only site — one unconditional value, no per-scheme variants. */}
+    <meta name="theme-color" content="#f4f7fb" />
+
+    {/* Self-hosted, preloaded — no third-party font request on the critical path. */}
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-grotesk" preload />
+    <Font cssVariable="--font-jetbrains" />
+
+    <NoScriptFallback />
+
+    <SEO
+      title={title}
+      description={description}
+      path={path}
+      image={image}
+      type={type}
+      schemas={schemas}
+      noindex={noindex}
+    />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <ClientRouter />
+  </head>
+
+  <body class="flex min-h-dvh flex-col">
+    <a href="#main" class="skip-link glass rounded-full px-4 py-2 text-sm font-medium">
+      Skip to main content
+    </a>
+
+    <Backdrop />
+    <Cursor />
+    <Header />
+
+    {/* tabindex="-1" lets the skip link and back-to-top move focus here. */}
+    <main id="main" tabindex="-1" class="flex-1 pt-16 lg:pt-18">
+      <slot />
+    </main>
+
+    <Footer />
+    <BackToTop />
+
+    <script>
+      import '../scripts/index';
+    </script>
+  </body>
+</html>

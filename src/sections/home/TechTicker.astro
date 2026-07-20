@@ -1,0 +1,136 @@
+---
+import { Icon } from 'astro-icon/components';
+import { techStack } from '../../data/site';
+import Marquee from '../../components/ui/Marquee.astro';
+
+// Split into two rows travelling in opposite directions. The offset slice keeps
+// the two rows from lining up into visible vertical columns.
+const mid = Math.ceil(techStack.length / 2);
+const rows = [techStack.slice(0, mid), techStack.slice(mid)];
+---
+
+<section class="tech-ticker relative py-11 sm:py-14" aria-labelledby="tech-heading">
+  <h2 id="tech-heading" class="sr-only">Technologies I work with</h2>
+
+  <div class="container-page mb-7 flex items-center justify-center gap-3" data-reveal="fade">
+    <span class="tech-ticker__rule" aria-hidden="true"></span>
+    <p class="text-[0.7rem] font-medium tracking-[0.2em] text-text-dim uppercase">
+      Tools I reach for
+    </p>
+    <span class="tech-ticker__rule tech-ticker__rule--flip" aria-hidden="true"></span>
+  </div>
+
+  <div class="flex flex-col gap-2.5 sm:gap-3">
+    {
+      rows.map((row, index) => (
+        <Marquee duration={index === 0 ? 46 : 54} reverse={index === 1}>
+          <ul class="flex items-center gap-2.5 pr-2.5">
+            {row.map((tech) => (
+              /* Each chip carries its own brand colour as `--tech`; the styles
+                 below derive every hover state from that one value. */
+              <li class="tech-chip shrink-0" style={`--tech:${tech.color}`}>
+                <Icon
+                  name={tech.icon}
+                  width={16}
+                  height={16}
+                  class="tech-chip__icon"
+                  aria-hidden="true"
+                />
+                <span class="tech-chip__label">{tech.name}</span>
+              </li>
+            ))}
+          </ul>
+        </Marquee>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  /* Hairline that fades out from the label on both sides. */
+  .tech-ticker__rule {
+    height: 1px;
+    width: clamp(1.5rem, 8vw, 5rem);
+    background: linear-gradient(to left, var(--border-strong), transparent);
+  }
+  .tech-ticker__rule--flip {
+    background: linear-gradient(to right, var(--border-strong), transparent);
+  }
+
+  /* Top and bottom edges as fading hairlines rather than hard borders, so the
+     band separates from the hero without boxing it in. */
+  .tech-ticker::before,
+  .tech-ticker::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border-strong), transparent);
+  }
+  .tech-ticker::before {
+    top: 0;
+  }
+  .tech-ticker::after {
+    bottom: 0;
+  }
+
+  .tech-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background-color: var(--surface-solid);
+    box-shadow: var(--shadow-soft);
+    transition:
+      transform 0.35s var(--ease-out-expo),
+      border-color 0.35s var(--ease-out-expo),
+      background-color 0.35s var(--ease-out-expo),
+      box-shadow 0.35s var(--ease-out-expo);
+  }
+
+  /*
+    Icons carry a muted version of their own brand colour at rest — enough to
+    read as the real logo without turning the row into a rainbow — then resolve
+    to full brand on hover.
+  */
+  .tech-chip__icon {
+    color: color-mix(in oklab, var(--tech) 45%, var(--text-dim));
+    transition: color 0.35s var(--ease-out-expo);
+  }
+
+  .tech-chip__label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--text-muted);
+    transition: color 0.35s var(--ease-out-expo);
+  }
+
+  .tech-chip:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--tech) 45%, transparent);
+    background-color: color-mix(in oklab, var(--tech) 7%, var(--surface-solid));
+    box-shadow: 0 8px 22px -10px color-mix(in oklab, var(--tech) 60%, transparent);
+  }
+
+  .tech-chip:hover .tech-chip__icon {
+    /* Nudged toward the text colour so pale brands (React, Tailwind) stay
+       visible against a white chip instead of washing out. */
+    color: color-mix(in oklab, var(--tech) 85%, var(--text));
+  }
+
+  .tech-chip:hover .tech-chip__label {
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tech-chip {
+      transition: none;
+    }
+    .tech-chip:hover {
+      transform: none;
+    }
+  }
+</style>

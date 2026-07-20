@@ -1,0 +1,405 @@
+---
+import { Icon } from 'astro-icon/components';
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/ui/Section.astro';
+import CopyButton from '../components/ui/CopyButton.astro';
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import { contact, site } from '../data/site';
+import { absoluteUrl } from '../utils/seo';
+
+type Channel = {
+  label: string;
+  value: string;
+  /** Text placed on the clipboard — usually the raw value. */
+  copy?: string;
+  href?: string;
+  icon: string;
+  external?: boolean;
+  note?: string;
+};
+
+/* `phone` is intentionally nullable in the data — an absent number is omitted
+   rather than rendered as a placeholder. */
+const channels: Channel[] = [
+  {
+    label: 'Email',
+    value: contact.email,
+    href: `mailto:${contact.email}`,
+    icon: 'lucide:mail',
+    note: 'Best way to reach me — I reply within a day.',
+  },
+  {
+    label: 'WhatsApp',
+    value: contact.whatsapp.display,
+    copy: contact.whatsapp.number,
+    href: contact.whatsapp.url,
+    icon: 'simple-icons:whatsapp',
+    external: true,
+    note: 'Fastest for a quick question — Asia/Dhaka hours.',
+  },
+  ...(contact.phone
+    ? [
+        {
+          label: 'Phone',
+          value: contact.phone,
+          href: `tel:${contact.phone.replace(/[^+\d]/g, '')}`,
+          icon: 'lucide:phone',
+          note: 'Available during Asia/Dhaka working hours.',
+        } satisfies Channel,
+      ]
+    : []),
+  {
+    label: 'GitHub',
+    value: contact.githubHandle,
+    copy: contact.github,
+    href: contact.github,
+    icon: 'simple-icons:github',
+    external: true,
+    note: 'Open source work and experiments.',
+  },
+  {
+    label: 'LinkedIn',
+    value: contact.linkedinHandle,
+    copy: contact.linkedin,
+    href: contact.linkedin,
+    icon: 'simple-icons:linkedin',
+    external: true,
+    note: 'Professional history and recommendations.',
+  },
+  {
+    label: 'Portfolio',
+    value: contact.website.replace(/^https?:\/\//, ''),
+    copy: contact.website,
+    href: contact.website,
+    icon: 'lucide:globe',
+    external: true,
+    note: 'This site.',
+  },
+];
+
+type Fact = {
+  label: string;
+  value: string;
+  icon: string;
+  note?: string;
+  /** Optional outbound link rendered beneath the value. */
+  href?: string;
+};
+
+const facts: Fact[] = [
+  {
+    label: 'Location',
+    value: contact.location,
+    icon: 'lucide:map-pin',
+    note: contact.locationNote,
+    href: contact.mapUrl,
+  },
+  {
+    label: 'Timezone',
+    value: contact.timezone,
+    icon: 'lucide:clock',
+    note: 'Strong daily overlap with European and APAC teams.',
+  },
+  {
+    label: 'Availability',
+    value: contact.availability,
+    icon: 'lucide:calendar-check',
+    note: 'Open to senior full stack and backend roles.',
+  },
+];
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+
+const contactSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  '@id': absoluteUrl('/contact#contactpage', origin),
+  name: `Contact ${site.name}`,
+  description: `Get in touch with ${site.name}, ${site.role}.`,
+  /*
+    A bare @id reference, not a second Person literal. Without the @id this was
+    an anonymous node duplicating name/email/telephone — to a consumer, two
+    people who happen to share an email rather than one canonical entity.
+  */
+  mainEntity: { '@id': absoluteUrl('/#person', origin) },
+};
+---
+
+<PageLayout
+  title="Contact"
+  description={`Get in touch with Md Rostom Ali — Senior Full Stack Engineer based in ${contact.location}, available for remote opportunities.`}
+  eyebrow="Get in touch"
+  eyebrowIcon="lucide:mail"
+  heading="Let's build something"
+  headingAccent="amazing together."
+  intro="No contact form — just the details you need. Email copies with one click; everything else opens straight through."
+  schemas={[contactSchema]}
+>
+  <Section spacing="md">
+    <div class="grid gap-4 lg:grid-cols-[1.4fr_1fr] lg:gap-8">
+      {/* Channels */}
+      <div>
+        <h2
+          class="text-xs font-semibold tracking-widest text-text-dim uppercase"
+          data-reveal="fade"
+        >
+          Channels
+        </h2>
+
+        <ul class="mt-5 flex flex-col gap-3" data-reveal-group="80">
+          {
+            channels.map((channel) => (
+              <li
+                class="contact-row group/row flex items-center gap-4 rounded-2xl glass p-4 sm:p-5"
+                data-reveal="slide"
+              >
+                <span
+                  class="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border-base bg-bg-inset text-text-muted transition-colors duration-400 group-hover/row:text-[var(--primary)]"
+                  aria-hidden="true"
+                >
+                  <Icon name={channel.icon} width={18} height={18} />
+                </span>
+
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs text-text-dim">{channel.label}</p>
+                  <a
+                    href={channel.href}
+                    class="contact-link block truncate text-sm font-medium sm:text-base"
+                    {...(channel.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
+                    {channel.value}
+                    {channel.external && <span class="sr-only"> (opens in a new tab)</span>}
+                  </a>
+                  {channel.note && (
+                    <p class="mt-0.5 truncate text-xs text-text-dim">{channel.note}</p>
+                  )}
+                </div>
+
+                {/*
+                  External profiles get an open-in-new-tab affordance instead of
+                  a copy button — you visit those, you don't paste them.
+
+                  It duplicates the value link above, so it is hidden from
+                  assistive tech and removed from the tab order: keyboard and
+                  screen-reader users already have that link, and announcing the
+                  same destination twice per row is just noise.
+                */}
+                {channel.external ? (
+                  <a
+                    href={channel.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="contact-open"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  >
+                    <Icon name="lucide:arrow-up-right" width={16} height={16} />
+                  </a>
+                ) : (
+                  <CopyButton
+                    value={channel.copy ?? channel.value}
+                    label={`${channel.label} — ${channel.copy ?? channel.value}`}
+                  />
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {/* Availability panel */}
+      <aside class="lg:sticky lg:top-28 lg:self-start" data-reveal="scale">
+        <div class="rounded-2xl glass p-5 shadow-soft sm:p-6">
+          <Badge variant="success" pulse>{contact.availability}</Badge>
+
+          <h2 class="mt-5 font-display text-xl font-semibold">Working with me</h2>
+          <p class="mt-2 text-sm leading-relaxed text-text-muted">
+            I'm currently building logistics software at Tixpi and open to senior full stack or
+            backend roles, contract work and technical partnerships.
+          </p>
+
+          <dl class="mt-6 flex flex-col gap-4 border-t border-border-base pt-5">
+            {
+              facts.map((fact) => (
+                <div class="flex gap-3">
+                  <Icon
+                    name={fact.icon}
+                    width={16}
+                    height={16}
+                    class="mt-0.5 shrink-0 text-text-dim"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <dt class="text-xs text-text-dim">{fact.label}</dt>
+                    <dd class="text-sm font-medium">{fact.value}</dd>
+                    {fact.note && <p class="mt-0.5 text-xs text-text-dim">{fact.note}</p>}
+                    {fact.href && (
+                      <a
+                        href={fact.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="contact-link mt-1 inline-flex items-center gap-1 text-xs font-medium text-[var(--primary)]"
+                      >
+                        <Icon name="lucide:map" width={12} height={12} aria-hidden="true" />
+                        View on map
+                        <span class="sr-only"> (opens in a new tab)</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))
+            }
+          </dl>
+
+          <div class="mt-7 flex flex-col gap-2.5">
+            <Button
+              href={`mailto:${contact.email}`}
+              variant="primary"
+              icon="lucide:send"
+              class="w-full"
+              magnetic
+            >
+              Send an email
+            </Button>
+            <Button href="/resume" variant="secondary" icon="lucide:file-text" class="w-full">
+              View résumé
+            </Button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </Section>
+
+  {/* Closing banner */}
+  <Section spacing="md">
+    <div
+      class="contact-banner relative overflow-hidden rounded-3xl px-6 py-11 text-center sm:px-10"
+      data-reveal="scale"
+    >
+      <div class="contact-banner__aurora absolute inset-0" aria-hidden="true"></div>
+
+      <div class="relative">
+        <h2 class="font-display text-2xl font-semibold text-white sm:text-3xl">
+          Prefer to start with the work?
+        </h2>
+        <p class="mx-auto mt-3 max-w-lg text-sm text-white/80 sm:text-base">
+          Browse the case studies behind seven production systems, or read the full career history
+          first.
+        </p>
+        <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button
+            href="/projects"
+            variant="outline"
+            size="lg"
+            class="border-white/35 text-white hover:bg-white/10"
+            iconRight="lucide:arrow-right"
+            magnetic
+          >
+            View projects
+          </Button>
+          <Button
+            href="/experience"
+            variant="outline"
+            size="lg"
+            class="border-white/35 text-white hover:bg-white/10"
+            iconRight="lucide:arrow-right"
+            magnetic
+          >
+            View experience
+          </Button>
+        </div>
+      </div>
+    </div>
+  </Section>
+</PageLayout>
+
+<style>
+  .contact-row {
+    transition:
+      transform 0.4s var(--ease-out-expo),
+      border-color 0.4s var(--ease-out-expo);
+  }
+
+  .contact-row:hover {
+    transform: translateX(4px);
+    border-color: color-mix(in oklab, var(--primary) 32%, transparent);
+  }
+
+  /* Sized to match CopyButton so mixed rows stay on the same grid. */
+  .contact-open {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    transition:
+      color 0.3s var(--ease-out-expo),
+      border-color 0.3s var(--ease-out-expo),
+      background-color 0.3s var(--ease-out-expo),
+      transform 0.3s var(--ease-out-expo);
+  }
+
+  /* The arrow leans outward as the row is hovered, reinforcing "this leaves the
+     page" before the click. */
+  .contact-row:hover .contact-open {
+    border-color: color-mix(in oklab, var(--primary) 40%, transparent);
+    background-color: color-mix(in oklab, var(--primary) 8%, transparent);
+    color: var(--primary);
+    transform: translate(1px, -1px);
+  }
+
+  .contact-open:hover {
+    border-color: var(--border-strong);
+    background-color: var(--surface);
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-row:hover .contact-open {
+      transform: none;
+    }
+  }
+
+  /* Animated underline on the value itself. */
+  .contact-link {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .contact-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 1px;
+    width: 0;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 0.35s var(--ease-out-expo);
+  }
+
+  .contact-row:hover .contact-link::after {
+    width: 100%;
+  }
+
+  .contact-banner {
+    background: linear-gradient(135deg, #1e3a8a, #6d28d9 55%, #0891b2);
+  }
+
+  .contact-banner__aurora {
+    background:
+      radial-gradient(circle at 20% 25%, rgb(255 255 255 / 0.25), transparent 45%),
+      radial-gradient(circle at 80% 75%, rgb(6 182 212 / 0.4), transparent 50%);
+    animation: aurora 18s ease-in-out infinite alternate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-banner__aurora {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,157 @@
+---
+import { Icon } from 'astro-icon/components';
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/ui/Section.astro';
+import Timeline from '../components/Timeline.astro';
+import Badge from '../components/ui/Badge.astro';
+import Button from '../components/ui/Button.astro';
+import CallToAction from '../sections/CallToAction.astro';
+import { experiences } from '../data/experience';
+import { profilePageSchema } from '../utils/seo';
+import { site } from '../data/site';
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+---
+
+<PageLayout
+  title="Experience"
+  description={`${site.yearsExperience}+ years across commercial PHP products at Inilabs, multi-tenant SaaS at WPDeveloper, and logistics engineering for Tixpi in Zurich.`}
+  eyebrow="Career"
+  eyebrowIcon="lucide:briefcase"
+  heading={`${site.yearsExperience}+ years of building`}
+  headingAccent="production systems"
+  intro="Three companies, one throughline: software that a team depends on every working day. Here is what each role actually involved."
+  type="profile"
+  schemas={[profilePageSchema('/experience', origin)]}
+>
+  <Section spacing="md">
+    <Timeline>
+      {
+        experiences.map((job) => (
+          <li class="relative pb-9 pl-11 last:pb-0 md:pl-16" data-reveal="slide">
+            {/* Rail node — the current role gets a pulsing ring */}
+            <span
+              class:list={[
+                'exp-node absolute top-1 left-0 grid h-8 w-8 place-items-center rounded-full border text-white md:h-10 md:w-10',
+                job.current
+                  ? 'exp-node--current border-transparent brand-fill'
+                  : 'border-border-strong bg-bg text-text-muted',
+              ]}
+              aria-hidden="true"
+            >
+              <Icon name={job.icon} width={15} height={15} />
+            </span>
+
+            <article class="rounded-2xl glass p-5 shadow-soft sm:p-6">
+              <header class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2.5">
+                    <h2 class="font-display text-xl font-semibold sm:text-2xl">{job.role}</h2>
+                    {job.current && (
+                      <Badge variant="success" pulse>
+                        Current
+                      </Badge>
+                    )}
+                  </div>
+
+                  <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
+                    <span class="font-medium text-[var(--primary)]">{job.company}</span>
+                    <span class="flex items-center gap-1.5">
+                      <Icon name="lucide:map-pin" width={13} height={13} aria-hidden="true" />
+                      {job.location}
+                    </span>
+                  </p>
+                </div>
+
+                <p class="flex items-center gap-1.5 font-mono text-xs whitespace-nowrap text-text-dim">
+                  <Icon name="lucide:calendar" width={13} height={13} aria-hidden="true" />
+                  {job.period}
+                </p>
+              </header>
+
+              <p class="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">{job.summary}</p>
+
+              <h3 class="mt-6 text-xs font-semibold tracking-widest text-text-dim uppercase">
+                Highlights
+              </h3>
+              <ul class="mt-3 flex flex-col gap-2.5">
+                {job.highlights.map((highlight) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-text-muted">
+                    <Icon
+                      name="lucide:check"
+                      width={15}
+                      height={15}
+                      class="mt-1 shrink-0 text-[var(--accent)]"
+                      aria-hidden="true"
+                    />
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <ul class="mt-6 flex flex-wrap gap-1.5 border-t border-border-base pt-5">
+                {job.stack.map((tech) => (
+                  <li>
+                    <Badge variant="muted" class="text-[0.7rem]">
+                      {tech}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </li>
+        ))
+      }
+    </Timeline>
+
+    <div class="mt-10 flex flex-col items-center gap-4 text-center" data-reveal="fade">
+      <p class="text-sm text-text-muted">
+        Looking for the condensed version, or something you can print?
+      </p>
+      <Button href="/resume" variant="secondary" size="lg" icon="lucide:file-text" magnetic>
+        View the full résumé
+      </Button>
+    </div>
+  </Section>
+
+  <CallToAction
+    heading="Want the detail behind any of this?"
+    description="Happy to walk through the architecture decisions, the trade-offs that didn't work out, and what I'd do differently now."
+  />
+</PageLayout>
+
+<style>
+  .exp-node {
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+
+  /* Pulsing halo marks the current role without relying on colour alone —
+     the "Current" badge carries the same meaning in text. */
+  .exp-node--current::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 1.5px solid color-mix(in oklab, var(--primary) 55%, transparent);
+    animation: exp-pulse 2.4s ease-out infinite;
+  }
+
+  @keyframes exp-pulse {
+    0% {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(1.45);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .exp-node--current::after {
+      animation: none;
+      opacity: 0.6;
+    }
+  }
+</style>

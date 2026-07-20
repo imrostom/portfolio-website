@@ -1,0 +1,96 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { cn } from '../../utils/cn';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Adds a gradient hairline that traces the border on hover. */
+  glow?: boolean;
+  /** Lifts the card and deepens its shadow on hover. */
+  interactive?: boolean;
+  /** Enables a cursor-tracked 3D tilt. Ignored under reduced-motion. */
+  tilt?: boolean;
+  as?: 'div' | 'article' | 'li' | 'section';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+}
+
+const {
+  glow = true,
+  interactive = false,
+  tilt = false,
+  as: Tag = 'div',
+  padding = 'md',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const paddings = {
+  none: '',
+  sm: 'p-3.5 sm:p-4',
+  md: 'p-5 sm:p-6',
+  lg: 'p-5 sm:p-6',
+};
+---
+
+<Tag
+  class={cn(
+    'group/card relative overflow-hidden rounded-2xl glass shadow-soft',
+    'transition-[transform,box-shadow,border-color] duration-500 ease-[var(--ease-out-expo)]',
+    interactive && 'hover:-translate-y-1.5 hover:shadow-lift hover:border-border-strong',
+    glow && 'card-glow',
+    paddings[padding],
+    className,
+  )}
+  data-tilt={tilt ? '' : undefined}
+  {...rest}
+>
+  {
+    glow && (
+      <span
+        class="card-glow__ring pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover/card:opacity-100"
+        aria-hidden="true"
+      />
+    )
+  }
+  <div class={cn(tilt && 'tilt-content', 'relative')}><slot /></div>
+</Tag>
+
+<style>
+  /* Gradient border rendered as a masked ring so it sits exactly on the 1px edge
+     without needing a wrapper element or a doubled background. */
+  .card-glow__ring {
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--primary) 60%, transparent),
+      color-mix(in oklab, var(--secondary) 45%, transparent) 45%,
+      color-mix(in oklab, var(--accent) 55%, transparent)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  [data-tilt] {
+    transform-style: preserve-3d;
+    transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  [data-tilt] .tilt-content {
+    transform: translateZ(28px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-tilt] {
+      transform: none !important;
+    }
+    [data-tilt] .tilt-content {
+      transform: none;
+    }
+  }
+</style>

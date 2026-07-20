@@ -1,0 +1,36 @@
+{
+  "name": "rostomali-portfolio",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "npm run generate:assets",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "generate:assets": "node --experimental-strip-types --no-warnings scripts/generate-assets.mjs",
+    "format": "prettier --write \"**/*.{astro,ts,js,mjs,css,json,md}\"",
+    "format:check": "prettier --check \"**/*.{astro,ts,js,mjs,css,json,md}\"",
+    "astro": "astro",
+    "check:covers": "node --experimental-strip-types --no-warnings scripts/check-covers.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@iconify-json/lucide": "^1.2.118",
+    "@iconify-json/simple-icons": "^1.2.91",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.1.1",
+    "astro-icon": "^1.1.5",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "prettier": "^3.9.5",
+    "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.35.3",
+    "typescript": "^6.0.3"
+  }
+}

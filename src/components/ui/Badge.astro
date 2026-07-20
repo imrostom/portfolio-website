@@ -1,0 +1,44 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { HTMLAttributes } from 'astro/types';
+import { cn } from '../../utils/cn';
+
+type Variant = 'default' | 'brand' | 'success' | 'muted';
+
+interface Props extends HTMLAttributes<'span'> {
+  variant?: Variant;
+  icon?: string;
+  /** Adds a softly pulsing status dot — used for the availability pill. */
+  pulse?: boolean;
+}
+
+const { variant = 'default', icon, pulse = false, class: className, ...rest } = Astro.props;
+
+const variants: Record<Variant, string> = {
+  default: 'glass text-text-muted',
+  brand:
+    'border border-[color-mix(in_oklab,var(--primary)_35%,transparent)] bg-[color-mix(in_oklab,var(--primary)_12%,transparent)] text-[color-mix(in_oklab,var(--primary)_85%,var(--text))]',
+  success: 'border border-emerald-500/35 bg-emerald-500/10 text-emerald-700',
+  muted: 'border border-border-base bg-bg-inset text-text-muted',
+};
+---
+
+<span
+  class={cn(
+    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tracking-tight',
+    variants[variant],
+    className,
+  )}
+  {...rest}
+>
+  {
+    pulse && (
+      <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      </span>
+    )
+  }
+  {icon && <Icon name={icon} width={13} height={13} aria-hidden="true" />}
+  <slot />
+</span>

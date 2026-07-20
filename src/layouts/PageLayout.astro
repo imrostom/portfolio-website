@@ -1,0 +1,66 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import { breadcrumbSchema } from '../utils/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Page header copy — defaults to the SEO title/description. */
+  heading?: string;
+  headingAccent?: string;
+  intro?: string;
+  eyebrow?: string;
+  eyebrowIcon?: string;
+  path?: string;
+  /** Overrides the automatic per-page OG card. Rarely needed. */
+  image?: string;
+  type?: 'website' | 'article' | 'profile';
+  schemas?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  heading,
+  headingAccent,
+  intro,
+  eyebrow,
+  eyebrowIcon,
+  path,
+  image,
+  type,
+  schemas = [],
+} = Astro.props;
+
+const currentPath = path ?? (Astro.url.pathname.replace(/\/$/, '') || '/');
+
+const crumbs = breadcrumbSchema([
+  { name: 'Home', href: '/' },
+  { name: title, href: currentPath },
+]);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={currentPath}
+  image={image}
+  type={type}
+  schemas={[crumbs, ...schemas]}
+>
+  {/* Consistent page header across every inner page. */}
+  <header class="container-page pt-10 pb-7 sm:pt-14 sm:pb-9">
+    <SectionHeading
+      as="h1"
+      align="left"
+      eyebrow={eyebrow}
+      eyebrowIcon={eyebrowIcon}
+      title={heading ?? title}
+      titleAccent={headingAccent}
+      description={intro ?? description}
+    />
+  </header>
+
+  <slot />
+</BaseLayout>

@@ -1,0 +1,509 @@
+@import 'tailwindcss';
+
+/*
+  Light-only site: neutralise Tailwind's built-in `dark:` variant so a stray
+  `dark:` utility can never activate for visitors whose OS is set to dark.
+*/
+@custom-variant dark (&:where(.__never-dark));
+
+/* ==========================================================================
+   1. Palette primitives
+   Raw brand ramps. These never change between themes — the semantic tokens
+   in section 2 are what flip.
+   ========================================================================== */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  --color-violet-450: #8b5cf6;
+  --color-violet-550: #7c3aed;
+
+  --color-cyan-450: #22d3ee;
+  --color-cyan-550: #06b6d4;
+
+  /* Bound to the `cssVariable` names registered in astro.config.mjs. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.5rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 40s linear infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-caret: caret 1s step-end infinite;
+}
+
+/* ==========================================================================
+   2. Semantic tokens
+
+   The site is light-only. There is no `.dark` class and no theme switching —
+   `color-scheme: light` is declared once so form controls, scrollbars and
+   the browser's own UI stay light regardless of the visitor's OS setting.
+   ========================================================================== */
+/*
+  Two distinct colour jobs, kept as separate token families:
+
+  · `--primary` / `--secondary` / `--accent` are ON-BACKGROUND colours — read as
+    text and icons against the page, so they must be dark enough on white.
+  · `--fill-*` are BEHIND-WHITE colours for solid brand surfaces (buttons,
+    monograms, active chips). White text sits on them, so they carry their own
+    contrast budget.
+
+  Collapsing these into one family is what previously let a 1.81:1 button ship.
+*/
+:root {
+  color-scheme: light;
+
+  /* The page is very slightly tinted rather than pure white, so white cards
+     read as raised surfaces instead of dissolving into the background. */
+  --bg: #f4f7fb;
+  --bg-subtle: #eaeff7;
+  --bg-inset: #edf1f8;
+
+  --surface: rgb(255 255 255 / 0.9);
+  --surface-solid: #ffffff;
+  --surface-hover: #ffffff;
+
+  --border: rgb(15 23 42 / 0.09);
+  --border-strong: rgb(15 23 42 / 0.17);
+
+  --text: #101828;
+  --text-muted: #4a5567;
+  /* Dark enough to clear 4.5:1 against `--bg-inset`, not just the page — dim
+     text is frequently used inside tinted cards. */
+  --text-dim: #5d6878;
+
+  /* blue-700, not the brief's blue-600: on-background text has to clear 4.5:1
+     against the tinted section band too, where blue-600 lands at 4.48. The
+     brief blue survives as `--fill-from`, where brand colour is most visible. */
+  --primary: #1d4ed8;
+  --secondary: #7c3aed;
+  /* cyan-700 rather than cyan-600: clears 4.5:1 on the page, so the accent is
+     safe for body-size text and not only for icons. */
+  --accent: #0e7490;
+
+  --ring: #1d4ed8;
+
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.05), 0 8px 24px -10px rgb(15 23 42 / 0.12);
+  --shadow-lift: 0 2px 6px rgb(15 23 42 / 0.06), 0 24px 48px -18px rgb(15 23 42 / 0.2);
+
+  /* The aurora is a whisper on a light page — at dark-mode strength it reads as
+     a haze over the type rather than as depth. */
+  --glow-opacity: 0.26;
+  --grid-line: rgb(15 23 42 / 0.045);
+
+  /* Brand fill. These are the values from the original brief; every one clears
+     5:1 against white. */
+  --fill-from: #2563eb;
+  --fill-via: #7c3aed;
+  --fill-to: #0e7490;
+}
+
+/* Expose the semantic tokens to Tailwind's utility generator. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-inset: var(--bg-inset);
+  --color-surface: var(--surface);
+  --color-surface-solid: var(--surface-solid);
+  --color-surface-hover: var(--surface-hover);
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-fill-from: var(--fill-from);
+  --color-fill-via: var(--fill-via);
+  --color-fill-to: var(--fill-to);
+}
+
+/* The one gradient that white content is allowed to sit on. */
+@utility brand-fill {
+  background-image: linear-gradient(135deg, var(--fill-from), var(--fill-via) 55%, var(--fill-to));
+  color: #fff;
+}
+
+/* ==========================================================================
+   3. Base
+   ========================================================================== */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Offset anchor targets so the sticky header never covers a heading. */
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 28%, transparent);
+    color: var(--text);
+  }
+
+  /* A single visible focus treatment, applied only for keyboard users. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 0.35rem;
+  }
+
+  /* Never trap focus invisibly: the skip link surfaces on first Tab. */
+  .skip-link {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 200;
+    translate: 0 -200%;
+    transition: translate 0.25s var(--ease-out-expo);
+  }
+  .skip-link:focus-visible {
+    translate: 0 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--text) 18%, transparent);
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--text) 32%, transparent);
+    background-clip: content-box;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   4. Component utilities
+   ========================================================================== */
+@utility container-page {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: 1.25rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Frosted card surface. Backdrop blur is opt-in via `.glass` so we only pay
+   for it where it actually reads as glass. */
+@utility glass {
+  background-color: var(--surface);
+  /* Prefixed first, unprefixed last: the CSS minifier collapses the pair to the
+     LAST declaration, so this order is what keeps the standard property (and
+     therefore Firefox support). Same convention Tailwind itself uses. */
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--border);
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(
+    110deg,
+    var(--text) 10%,
+    var(--primary) 40%,
+    var(--secondary) 62%,
+    var(--accent) 88%
+  );
+  background-size: 220% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradient-pan 8s ease-in-out infinite alternate;
+}
+
+/* A 1px gradient hairline that animates on hover — used on cards and the footer. */
+@utility gradient-hairline {
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--primary),
+    var(--secondary),
+    var(--accent),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: gradient-pan 6s linear infinite alternate;
+}
+
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+@utility shadow-lift {
+  box-shadow: var(--shadow-lift);
+}
+
+/* ==========================================================================
+   5. Scroll reveal
+   Elements start hidden and are unhidden by IntersectionObserver adding
+   `.is-revealed`. If JS never runs, the `no-js` fallback in <head> keeps
+   everything visible — content is never JS-gated.
+   ========================================================================== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 20px)) scale(var(--reveal-scale, 1));
+  filter: blur(var(--reveal-blur, 0px));
+  transition:
+    opacity 0.75s var(--ease-out-expo),
+    transform 0.75s var(--ease-out-expo),
+    filter 0.75s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal='fade'] {
+  --reveal-y: 0px;
+}
+[data-reveal='slide'] {
+  --reveal-y: 28px;
+}
+[data-reveal='scale'] {
+  --reveal-y: 12px;
+  --reveal-scale: 0.96;
+}
+[data-reveal='blur'] {
+  --reveal-y: 16px;
+  --reveal-blur: 12px;
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  will-change: auto;
+}
+
+/* ==========================================================================
+   6. Keyframes
+   ========================================================================== */
+@keyframes gradient-pan {
+  to {
+    background-position: 100% center;
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -3%, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(-3%, 4%, 0) scale(1.05);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--float-rot, 0deg));
+  }
+  50% {
+    transform: translateY(var(--float-distance, -14px)) rotate(var(--float-rot, 0deg));
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   7. View transitions
+   ========================================================================== */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: vt-out 0.28s var(--ease-out-expo) both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.42s var(--ease-out-expo) both;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* The header and footer persist across navigations, so they must not animate. */
+::view-transition-group(site-header),
+::view-transition-group(site-footer) {
+  animation: none;
+}
+
+/* ==========================================================================
+   8. Reduced motion
+   Honour the OS preference everywhere: kill transforms and looping
+   decoration, keep opacity so nothing is left invisible.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+
+  .custom-cursor {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   9. Print — the résumé page is expected to print cleanly.
+   ========================================================================== */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --text: #000000;
+    --text-muted: #333333;
+    --surface: #ffffff;
+    --border: #d4d4d4;
+  }
+
+  .no-print,
+  .custom-cursor,
+  .site-backdrop {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.75em;
+    color: #555;
+    word-break: break-all;
+  }
+
+  .print-break-inside-avoid {
+    break-inside: avoid;
+  }
+}

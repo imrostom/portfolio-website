@@ -1,0 +1,34 @@
+---
+import { featuredProjects } from '../../data/projects';
+import Section from '../../components/ui/Section.astro';
+import SectionHeading from '../../components/ui/SectionHeading.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Button from '../../components/ui/Button.astro';
+---
+
+<Section tinted aria-labelledby="featured-heading">
+  <SectionHeading
+    id="featured-heading"
+    eyebrow="Selected work"
+    eyebrowIcon="lucide:layout-grid"
+    title="Products I've"
+    titleAccent="shipped"
+    description="A few systems that went into production and stayed there — logistics operations, multi-tenant SaaS and AI-assisted tooling."
+  />
+
+  <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4" data-reveal-group="110">
+    {
+      featuredProjects.map((project) => (
+        <li class="h-full">
+          <ProjectCard project={project} />
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="mt-9 flex justify-center" data-reveal="fade">
+    <Button href="/projects" variant="secondary" size="lg" iconRight="lucide:arrow-right" magnetic>
+      Browse all projects
+    </Button>
+  </div>
+</Section>

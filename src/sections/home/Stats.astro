@@ -1,0 +1,66 @@
+---
+import { Icon } from 'astro-icon/components';
+import { stats } from '../../data/site';
+import Counter from '../../components/ui/Counter.astro';
+import Section from '../../components/ui/Section.astro';
+---
+
+<Section id="stats" spacing="md" aria-labelledby="stats-heading">
+  <h2 id="stats-heading" class="sr-only">By the numbers</h2>
+
+  <dl class="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4" data-reveal-group="90">
+    {
+      stats.map((stat) => (
+        <div
+          class="stat-card group/stat relative overflow-hidden rounded-2xl glass p-5 text-center sm:p-7"
+          data-reveal="scale"
+        >
+          <Icon
+            name={stat.icon}
+            width={20}
+            height={20}
+            class="mx-auto text-text-dim transition-colors duration-500 group-hover/stat:text-[var(--primary)]"
+            aria-hidden="true"
+          />
+
+          <dd class="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+            <Counter value={stat.value} suffix={stat.suffix} class="text-gradient" />
+          </dd>
+
+          <dt class="mt-2 text-sm font-medium text-text">{stat.label}</dt>
+          <p class="mt-1.5 text-xs leading-relaxed text-text-dim">{stat.note}</p>
+
+          {/* Glow that follows the card on hover */}
+          <span class="stat-card__glow pointer-events-none absolute inset-0" aria-hidden="true" />
+        </div>
+      ))
+    }
+  </dl>
+</Section>
+
+<style>
+  .stat-card {
+    transition:
+      transform 0.5s var(--ease-out-expo),
+      border-color 0.5s var(--ease-out-expo);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+
+  .stat-card__glow {
+    background: radial-gradient(
+      circle at 50% 0%,
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out-expo);
+  }
+
+  .stat-card:hover .stat-card__glow {
+    opacity: 1;
+  }
+</style>

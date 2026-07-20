@@ -1,0 +1,69 @@
+---
+import { cn } from '../../utils/cn';
+
+interface Props {
+  /** Seconds for one full pass. */
+  duration?: number;
+  reverse?: boolean;
+  pauseOnHover?: boolean;
+  class?: string;
+}
+
+const { duration = 40, reverse = false, pauseOnHover = true, class: className } = Astro.props;
+---
+
+{
+  /*
+  The track holds two identical copies of the slot, so translating it by -50%
+  lands exactly on the start of the second copy — a seamless loop.
+  The duplicate is aria-hidden so screen readers announce the list once.
+*/
+}
+<div
+  class={cn('marquee group relative flex overflow-hidden', className)}
+  data-pause-on-hover={pauseOnHover ? '' : undefined}
+>
+  <div
+    class="marquee__track flex w-max shrink-0 items-center"
+    style={`--marquee-duration:${duration}s`}
+    data-reverse={reverse ? '' : undefined}
+  >
+    <div class="flex shrink-0 items-center"><slot /></div>
+    <div class="flex shrink-0 items-center" aria-hidden="true"><slot /></div>
+  </div>
+</div>
+
+<style>
+  .marquee {
+    /* Fade both edges so items enter and leave without a hard cut. */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .marquee__track {
+    animation: marquee var(--marquee-duration, 40s) linear infinite;
+  }
+
+  .marquee__track[data-reverse] {
+    animation-name: marquee-reverse;
+  }
+
+  .marquee[data-pause-on-hover]:hover .marquee__track {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track {
+      animation: none;
+    }
+    .marquee {
+      overflow-x: auto;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+    /* Without animation the duplicate is pure noise — drop it. */
+    .marquee__track > div[aria-hidden='true'] {
+      display: none;
+    }
+  }
+</style>

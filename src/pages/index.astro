@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import Hero from '../sections/home/Hero.astro';
+import TechTicker from '../sections/home/TechTicker.astro';
+import Stats from '../sections/home/Stats.astro';
+import Highlights from '../sections/home/Highlights.astro';
+import Expertise from '../sections/home/Expertise.astro';
+import FeaturedWork from '../sections/home/FeaturedWork.astro';
+import CallToAction from '../sections/CallToAction.astro';
+---
+
+<BaseLayout title={site.name} description={site.description} path="/">
+  <Hero />
+  <TechTicker />
+  <Stats />
+  <Highlights />
+  <Expertise />
+  <FeaturedWork />
+  <CallToAction />
+</BaseLayout>

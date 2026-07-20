@@ -1,0 +1,128 @@
+---
+import { Icon } from 'astro-icon/components';
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/ui/Section.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import CallToAction from '../sections/CallToAction.astro';
+import { projects, projectCategories } from '../data/projects';
+import { absoluteUrl } from '../utils/seo';
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+
+/** ItemList structured data so the portfolio itself is machine-readable. */
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Projects by Md Rostom Ali',
+  itemListElement: projects.map((project, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    item: {
+      '@type': 'SoftwareApplication',
+      name: project.name,
+      description: project.description,
+      applicationCategory: project.category,
+      ...(project.links.demo ? { url: project.links.demo } : {}),
+      author: { '@id': absoluteUrl('/#person', origin) },
+    },
+  })),
+};
+---
+
+<PageLayout
+  title="Projects"
+  description="Selected projects by Md Rostom Ali — logistics platforms, multi-tenant SaaS, AI-assisted tooling, point-of-sale systems and commercial products."
+  eyebrow="Portfolio"
+  eyebrowIcon="lucide:layout-grid"
+  heading="Systems that went to"
+  headingAccent="production"
+  intro={`${projects.length} projects spanning logistics, SaaS, commerce and AI. Filter by category, and follow any card through to the live product or its marketplace listing.`}
+  schemas={[itemListSchema]}
+>
+  <Section spacing="md">
+    <div data-filter-root>
+      {/* Filter chips */}
+      <div class="flex flex-wrap items-center justify-between gap-4" data-reveal="fade">
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter projects by category">
+          {
+            projectCategories.map((category) => (
+              <button
+                type="button"
+                class="filter-chip rounded-full border border-border-base px-4 py-2 text-sm font-medium text-text-muted transition-all duration-300 hover:-translate-y-0.5 hover:border-border-strong hover:text-text"
+                data-filter={category}
+                data-active={category === 'All' ? '' : undefined}
+                aria-pressed={category === 'All' ? 'true' : 'false'}
+              >
+                {category}
+              </button>
+            ))
+          }
+        </div>
+
+        {/* Live region so filtering is announced, not just visible. */}
+        <p class="text-sm text-text-dim" data-filter-count role="status" aria-live="polite">
+          {projects.length} projects
+        </p>
+      </div>
+
+      {/* Grid */}
+      <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
+        {
+          projects.map((project, index) => (
+            <li class="h-full" data-filter-item data-category={project.category}>
+              <ProjectCard project={project} eager={index < 3} priority={index === 0} />
+            </li>
+          ))
+        }
+      </ul>
+
+      {/* Only reachable via JS filtering, so it starts hidden. */}
+      <div class="mt-11 flex flex-col items-center gap-3 text-center" data-filter-empty hidden>
+        <Icon
+          name="lucide:search-x"
+          width={28}
+          height={28}
+          class="text-text-dim"
+          aria-hidden="true"
+        />
+        <p class="text-text-muted">No projects in this category yet.</p>
+      </div>
+    </div>
+  </Section>
+
+  <CallToAction
+    heading="Have something like this in mind?"
+    description="If you're building a platform that needs to scale — or inherited one that doesn't — I'd be glad to talk it through."
+  />
+</PageLayout>
+
+<style>
+  .filter-chip[data-active] {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--fill-from), var(--fill-via));
+    color: #fff;
+    box-shadow: 0 8px 24px -10px color-mix(in oklab, var(--primary) 85%, transparent);
+  }
+
+  /* Filtered-in cards animate back in rather than snapping. */
+  [data-category][data-filtered-in] {
+    animation: filter-in 0.45s var(--ease-out-expo) both;
+  }
+
+  @keyframes filter-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-category][data-filtered-in] {
+      animation: none;
+    }
+  }
+</style>

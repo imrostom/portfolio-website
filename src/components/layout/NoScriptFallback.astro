@@ -1,0 +1,21 @@
+---
+/**
+ * No-JS fallbacks for the head.
+ *
+ * The site is light-only, so there is no theme bootstrap to run here any more —
+ * `color-scheme: light` in global.css does that job declaratively, with no
+ * script and therefore no flash. What remains is purely the progressive
+ * enhancement safety net: scroll-reveal and the animated meters are JS-driven,
+ * so without JS it must be shown rather than left invisible.
+ */
+---
+
+<noscript>
+  <style>
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+    }
+  </style>
+</noscript>

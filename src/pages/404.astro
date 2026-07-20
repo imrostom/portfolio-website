@@ -1,0 +1,102 @@
+---
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import { navigation } from '../data/site';
+
+/* Skip Home and Contact — they already have dedicated buttons above. */
+const suggestions = navigation.filter((item) => !['/', '/contact'].includes(item.href));
+---
+
+<BaseLayout
+  title="Page not found"
+  description="The page you were looking for doesn't exist. Head back home or explore the projects, experience and résumé instead."
+  path="/404"
+  noindex
+>
+  <div
+    class="container-page flex min-h-[70vh] flex-col items-center justify-center py-20 text-center"
+  >
+    {/* Oversized glitching status code */}
+    <p class="error-code font-display font-bold tracking-tighter select-none" aria-hidden="true">
+      404
+    </p>
+
+    <h1 class="mt-2 text-3xl font-semibold sm:text-4xl" data-reveal="slide">
+      This page took a wrong turn.
+    </h1>
+
+    <p
+      class="mt-4 max-w-md text-base leading-relaxed text-text-muted"
+      data-reveal="slide"
+      style="--reveal-delay:80ms"
+    >
+      The URL you followed doesn't exist — it may have moved, or it may never have been here at all.
+      Everything else is still where you left it.
+    </p>
+
+    <div
+      class="mt-9 flex flex-col gap-3 sm:flex-row"
+      data-reveal="slide"
+      style="--reveal-delay:160ms"
+    >
+      <Button href="/" size="lg" variant="primary" icon="lucide:home" magnetic>
+        Back to home
+      </Button>
+      <Button href="/contact" size="lg" variant="secondary" iconRight="lucide:arrow-right" magnetic>
+        Report a broken link
+      </Button>
+    </div>
+
+    <nav class="mt-10 w-full max-w-2xl" aria-label="Suggested pages">
+      <p class="text-xs font-semibold tracking-widest text-text-dim uppercase" data-reveal="fade">
+        Or try one of these
+      </p>
+
+      <ul class="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3" data-reveal-group="70">
+        {
+          suggestions.map((item) => (
+            <li data-reveal="scale">
+              <a
+                href={item.href}
+                class="suggestion group/sug flex items-center gap-2.5 rounded-2xl glass px-4 py-3 text-sm text-text-muted transition-all duration-300 hover:-translate-y-0.5 hover:text-text"
+              >
+                <Icon
+                  name={item.icon}
+                  width={16}
+                  height={16}
+                  class="text-text-dim transition-colors duration-300 group-hover/sug:text-[var(--primary)]"
+                  aria-hidden="true"
+                />
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</BaseLayout>
+
+<style>
+  .error-code {
+    font-size: clamp(6rem, 22vw, 12rem);
+    line-height: 0.9;
+    background-image: linear-gradient(110deg, var(--primary), var(--secondary) 45%, var(--accent));
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: gradient-pan 5s ease-in-out infinite alternate;
+  }
+
+  .suggestion:hover {
+    border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .error-code {
+      animation: none;
+    }
+  }
+</style>

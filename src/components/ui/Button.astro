@@ -1,0 +1,131 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { HTMLAttributes } from 'astro/types';
+import { cn } from '../../utils/cn';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline';
+type Size = 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
+  href?: string;
+  variant?: Variant;
+  size?: Size;
+  /** Iconify name rendered before the label. */
+  icon?: string;
+  /** Iconify name rendered after the label. */
+  iconRight?: string;
+  /** Adds a subtle cursor-follow pull. Ignored under reduced-motion. */
+  magnetic?: boolean;
+  /** Renders a native <button> instead of an anchor. */
+  as?: 'a' | 'button';
+  type?: 'button' | 'submit' | 'reset';
+  download?: boolean | string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  iconRight,
+  magnetic = false,
+  as,
+  type,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = as ?? (href ? 'a' : 'button');
+
+const base =
+  'group/btn relative inline-flex items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap ' +
+  'transition-[transform,background-color,border-color,box-shadow,color] duration-300 ease-[var(--ease-out-expo)] ' +
+  'active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 select-none';
+
+const variants: Record<Variant, string> = {
+  // Gradient fill with a soft coloured glow; the sheen is the ::after sweep below.
+  // The fill uses `--fill-*`, not the on-background brand tints — white text sits
+  // on it, and the lighter dark-mode tints would drop that to ~1.8:1.
+  primary:
+    'text-white shadow-[0_8px_28px_-8px_color-mix(in_oklab,var(--primary)_70%,transparent)] ' +
+    'hover:shadow-[0_14px_40px_-10px_color-mix(in_oklab,var(--primary)_85%,transparent)] hover:-translate-y-0.5 btn-sheen',
+  secondary:
+    'glass text-text hover:bg-surface-hover hover:border-border-strong hover:-translate-y-0.5 shadow-soft',
+  outline:
+    'border border-border-strong text-text hover:bg-surface hover:-translate-y-0.5 bg-transparent',
+  ghost: 'text-text-muted hover:text-text hover:bg-surface',
+};
+
+const sizes: Record<Size, string> = {
+  sm: 'h-9 px-4 text-sm',
+  md: 'h-11 px-5 text-sm',
+  lg: 'h-13 px-7 text-base',
+};
+
+const iconSize = size === 'lg' ? 20 : 16;
+---
+
+<Tag
+  href={href}
+  type={Tag === 'button' ? (type ?? 'button') : undefined}
+  class={cn(base, variants[variant], sizes[size], className)}
+  data-magnetic={magnetic ? '' : undefined}
+  {...rest}
+>
+  {
+    variant === 'primary' && (
+      <span
+        class="absolute inset-0 -z-10 rounded-full bg-[linear-gradient(110deg,var(--fill-from),var(--fill-via),var(--fill-to))] bg-[length:200%_auto] transition-[background-position] duration-500 group-hover/btn:bg-[position:100%_center]"
+        aria-hidden="true"
+      />
+    )
+  }
+
+  {icon && <Icon name={icon} width={iconSize} height={iconSize} aria-hidden="true" />}
+  <span class="relative"><slot /></span>
+  {
+    iconRight && (
+      <Icon
+        name={iconRight}
+        width={iconSize}
+        height={iconSize}
+        aria-hidden="true"
+        class="transition-transform duration-300 group-hover/btn:translate-x-0.5"
+      />
+    )
+  }
+</Tag>
+
+<style>
+  /* A light sweep that crosses the button on hover. Pure CSS so it costs no JS. */
+  .btn-sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.28) 50%,
+      transparent 70%
+    );
+    background-size: 250% 100%;
+    background-position: 150% 0;
+    opacity: 0;
+    transition:
+      background-position 0.75s var(--ease-out-expo),
+      opacity 0.2s linear;
+    pointer-events: none;
+  }
+
+  .btn-sheen:hover::after {
+    opacity: 1;
+    background-position: -50% 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-sheen::after {
+      display: none;
+    }
+  }
+</style>

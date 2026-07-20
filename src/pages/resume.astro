@@ -1,0 +1,408 @@
+---
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import Timeline from '../components/Timeline.astro';
+import { site, contact } from '../data/site';
+import { experiences, education, achievements } from '../data/experience';
+import { resumeSkills } from '../data/skills';
+import { projects } from '../data/projects';
+import { summary, resumeSections } from '../data/resume';
+import { breadcrumbSchema, profilePageSchema } from '../utils/seo';
+
+const origin = Astro.site ?? new URL(Astro.url.origin);
+
+/* This page uses BaseLayout directly, so it does not get PageLayout's automatic
+   breadcrumb. Added by hand rather than migrating layouts, which would inject a
+   second <h1> over the masthead below. */
+const crumbs = breadcrumbSchema(
+  [
+    { name: 'Home', href: '/' },
+    { name: 'Resume', href: '/resume' },
+  ],
+  origin,
+);
+
+/* Only the projects with a case study worth a recruiter's time. */
+const resumeProjects = projects.filter((p) => p.featured);
+
+/* Drop nav entries whose section is not rendered. */
+const sections = resumeSections.filter((s) => s.id !== 'education' || education.length > 0);
+---
+
+<BaseLayout
+  title="Resume"
+  description={`The full résumé of Md Rostom Ali — ${site.yearsExperience}+ years as a Senior Full Stack Engineer across SaaS, logistics and AI-integrated products. Read online, print, or download.`}
+  path="/resume"
+  type="profile"
+  schemas={[crumbs, profilePageSchema('/resume', origin)]}
+>
+  <div class="container-page py-10 sm:py-14">
+    <div class="grid gap-10 lg:grid-cols-[15rem_1fr] lg:gap-14">
+      {/* Sticky sidebar navigation */}
+      <aside class="no-print lg:sticky lg:top-28 lg:h-fit">
+        <nav data-scrollspy aria-label="Résumé sections">
+          <p class="text-xs font-semibold tracking-widest text-text-dim uppercase">Sections</p>
+          <ul
+            class="mt-4 flex flex-row gap-1 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0"
+          >
+            {
+              sections.map((section) => (
+                <li class="shrink-0">
+                  <a
+                    href={`#${section.id}`}
+                    class="spy-link flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm whitespace-nowrap text-text-muted transition-colors duration-300 hover:bg-surface hover:text-text"
+                  >
+                    <Icon name={section.icon} width={15} height={15} aria-hidden="true" />
+                    {section.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+
+        <div class="mt-8 hidden flex-col gap-2.5 lg:flex">
+          <Button href={site.resumePath} variant="primary" icon="lucide:download" download>
+            Download PDF
+          </Button>
+          <Button variant="secondary" icon="lucide:printer" data-print-resume as="button">
+            Print résumé
+          </Button>
+        </div>
+      </aside>
+
+      {/* Résumé document */}
+      <div class="min-w-0">
+        {/* Masthead */}
+        <header class="print-break-inside-avoid" data-reveal="fade">
+          <div class="flex flex-wrap items-start justify-between gap-6">
+            <div>
+              <h1 class="font-display text-3xl font-semibold sm:text-4xl">{site.name}</h1>
+              <p class="mt-1.5 text-lg text-text-muted">{summary.headline}</p>
+
+              <ul class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-text-muted">
+                <li class="flex items-center gap-1.5">
+                  <Icon name="lucide:mail" width={14} height={14} aria-hidden="true" />
+                  <a href={`mailto:${contact.email}`} class="hover:text-text">{contact.email}</a>
+                </li>
+                <li class="flex items-center gap-1.5">
+                  <Icon name="lucide:map-pin" width={14} height={14} aria-hidden="true" />
+                  {contact.locationShort}
+                </li>
+                <li class="flex items-center gap-1.5">
+                  <Icon name="simple-icons:github" width={14} height={14} aria-hidden="true" />
+                  <a href={contact.github} class="hover:text-text">{contact.githubHandle}</a>
+                </li>
+                <li class="flex items-center gap-1.5">
+                  <Icon name="simple-icons:linkedin" width={14} height={14} aria-hidden="true" />
+                  <a href={contact.linkedin} class="hover:text-text">{contact.linkedinHandle}</a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="no-print flex gap-2.5 lg:hidden">
+              <Button
+                href={site.resumePath}
+                variant="primary"
+                size="sm"
+                icon="lucide:download"
+                download
+              >
+                PDF
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="lucide:printer"
+                data-print-resume
+                as="button"
+              >
+                Print
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Summary */}
+        <section id="summary" class="resume-section print-break-inside-avoid" data-reveal="slide">
+          <h2 class="resume-heading">
+            <Icon name="lucide:user-round" width={17} height={17} aria-hidden="true" />
+            Summary
+          </h2>
+
+          <p class="mt-4 leading-relaxed text-text-muted">{summary.body}</p>
+
+          <dl class="mt-6 grid gap-3 sm:grid-cols-2">
+            {
+              summary.facts.map((fact) => (
+                <div class="flex items-start gap-3 rounded-2xl glass p-4">
+                  <Icon
+                    name={fact.icon}
+                    width={16}
+                    height={16}
+                    class="mt-0.5 shrink-0 text-[var(--primary)]"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <dt class="text-xs text-text-dim">{fact.label}</dt>
+                    <dd class="text-sm font-medium">{fact.value}</dd>
+                  </div>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        {/* Experience */}
+        <section id="experience" class="resume-section">
+          <h2 class="resume-heading">
+            <Icon name="lucide:briefcase" width={17} height={17} aria-hidden="true" />
+            Experience
+          </h2>
+
+          <Timeline class="mt-6">
+            {
+              experiences.map((job) => (
+                <li
+                  class="relative pb-9 pl-11 last:pb-0 print-break-inside-avoid"
+                  data-reveal="slide"
+                >
+                  <span
+                    class:list={[
+                      'resume-node absolute top-1 left-0 grid h-8 w-8 place-items-center rounded-full border',
+                      job.current
+                        ? 'border-transparent brand-fill'
+                        : 'border-border-strong bg-bg text-text-muted',
+                    ]}
+                    aria-hidden="true"
+                  >
+                    <Icon name={job.icon} width={14} height={14} />
+                  </span>
+
+                  <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <h3 class="font-display text-lg font-semibold">
+                      {job.role}
+                      <span class="text-text-muted"> · {job.company}</span>
+                    </h3>
+                    <p class="font-mono text-xs text-text-dim">{job.period}</p>
+                  </div>
+
+                  <p class="mt-1 text-sm text-text-dim">{job.location}</p>
+                  <p class="mt-3 text-sm leading-relaxed text-text-muted">{job.summary}</p>
+
+                  <ul class="mt-3 flex flex-col gap-2">
+                    {job.highlights.map((highlight) => (
+                      <li class="flex gap-2.5 text-sm leading-relaxed text-text-muted">
+                        <span
+                          class="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]"
+                          aria-hidden="true"
+                        />
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p class="mt-3 font-mono text-xs text-text-dim">{job.stack.join(' · ')}</p>
+                </li>
+              ))
+            }
+          </Timeline>
+        </section>
+
+        {/* Projects */}
+        <section id="projects" class="resume-section">
+          <h2 class="resume-heading">
+            <Icon name="lucide:layout-grid" width={17} height={17} aria-hidden="true" />
+            Selected Projects
+          </h2>
+
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2" data-reveal-group="80">
+            {
+              resumeProjects.map((project) => (
+                <li class="rounded-2xl glass p-5 print-break-inside-avoid" data-reveal="slide">
+                  <div class="flex items-center justify-between gap-3">
+                    <h3 class="font-display text-base font-semibold">{project.name}</h3>
+                    <span class="font-mono text-xs text-text-dim">{project.year}</span>
+                  </div>
+                  <p class="mt-1 text-xs font-medium text-[var(--primary)]">{project.tagline}</p>
+                  <p class="mt-2.5 text-sm leading-relaxed text-text-muted">
+                    {project.description}
+                  </p>
+
+                  <ul class="mt-3 flex flex-wrap gap-1.5">
+                    {project.caseStudy.metrics.map((metric) => (
+                      <li class="rounded-full border border-border-base px-2.5 py-0.5 text-[0.68rem] text-text-muted">
+                        {metric.label}: <span class="font-medium text-text">{metric.value}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        {/* Technical skills */}
+        <section id="skills" class="resume-section print-break-inside-avoid">
+          <h2 class="resume-heading">
+            <Icon name="lucide:sparkles" width={17} height={17} aria-hidden="true" />
+            Technical Skills
+          </h2>
+
+          <dl class="mt-6 flex flex-col gap-4">
+            {
+              resumeSkills.map((group) => (
+                <div class="grid gap-2 sm:grid-cols-[9rem_1fr] sm:gap-4">
+                  <dt class="text-sm font-semibold">{group.title}</dt>
+                  <dd class="flex flex-wrap gap-1.5">
+                    {group.items.map((item) => (
+                      <Badge variant="muted" class="text-[0.7rem]">
+                        {item}
+                      </Badge>
+                    ))}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        {
+          /* Education — omitted entirely while `education` is empty, rather than
+            rendering a heading with nothing beneath it. */
+        }
+        {
+          education.length > 0 && (
+            <section id="education" class="resume-section print-break-inside-avoid">
+              <h2 class="resume-heading">
+                <Icon name="lucide:graduation-cap" width={17} height={17} aria-hidden="true" />
+                Education
+              </h2>
+
+              <ul class="mt-6 flex flex-col gap-4" data-reveal-group="80">
+                {education.map((entry) => (
+                  <li class="rounded-2xl glass p-5" data-reveal="slide">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 class="font-display text-base font-semibold">{entry.credential}</h3>
+                      <p class="font-mono text-xs text-text-dim">{entry.period}</p>
+                    </div>
+                    <p class="mt-1 text-sm text-[var(--primary)]">{entry.institution}</p>
+                    <p class="mt-2 text-sm leading-relaxed text-text-muted">{entry.detail}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {/* Achievements */}
+        <section id="achievements" class="resume-section print-break-inside-avoid">
+          <h2 class="resume-heading">
+            <Icon name="lucide:award" width={17} height={17} aria-hidden="true" />
+            Achievements
+          </h2>
+
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2" data-reveal-group="80">
+            {
+              achievements.map((item) => (
+                <li class="flex gap-3.5 rounded-2xl glass p-5" data-reveal="slide">
+                  <span
+                    class="grid h-9 w-9 shrink-0 place-items-center rounded-xl brand-fill"
+                    aria-hidden="true"
+                  >
+                    <Icon name={item.icon} width={16} height={16} />
+                  </span>
+                  <div>
+                    <h3 class="text-sm font-semibold">{item.title}</h3>
+                    <p class="mt-1 text-sm leading-relaxed text-text-muted">{item.detail}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        {/* Footer actions */}
+        <div
+          class="no-print mt-10 flex flex-col gap-3 border-t border-border-base pt-8 sm:flex-row"
+        >
+          <Button
+            href={site.resumePath}
+            variant="primary"
+            size="lg"
+            icon="lucide:download"
+            download
+            magnetic
+          >
+            Download PDF
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            icon="lucide:printer"
+            data-print-resume
+            as="button"
+            magnetic
+          >
+            Print résumé
+          </Button>
+          <Button href="/contact" variant="ghost" size="lg" iconRight="lucide:arrow-right">
+            Get in touch
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .resume-section {
+    margin-top: 3.5rem;
+    scroll-margin-top: 7rem;
+  }
+
+  .resume-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .resume-node {
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+
+  /* Active sidebar link, driven by the scroll-spy observer. */
+  .spy-link[data-active] {
+    background-color: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  @media print {
+    .resume-section {
+      margin-top: 1.75rem;
+    }
+    .resume-heading {
+      color: #000;
+    }
+  }
+</style>
+
+<script>
+  // Delegated so it survives view transitions without re-binding.
+  document.addEventListener('click', (event) => {
+    if ((event.target as Element | null)?.closest('[data-print-resume]')) {
+      window.print();
+    }
+  });
+</script>

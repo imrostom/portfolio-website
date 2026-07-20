@@ -1,0 +1,205 @@
+---
+import { Icon } from 'astro-icon/components';
+import PageLayout from '../layouts/PageLayout.astro';
+import Section from '../components/ui/Section.astro';
+import CallToAction from '../sections/CallToAction.astro';
+import { skillGroups } from '../data/skills';
+import { authorship, shopifyApps } from '../data/projects';
+---
+
+<PageLayout
+  title="Skills"
+  description="Technical skills across backend, frontend, databases, DevOps and AI engineering — Laravel, Node.js, Vue, Nuxt, MySQL, Redis, Docker and AWS."
+  eyebrow="Capabilities"
+  eyebrowIcon="lucide:sparkles"
+  heading="The toolkit, and how"
+  headingAccent="deep it goes"
+  intro={`These are the tools behind ${authorship.codecanyon.products} self-published CodeCanyon products, ${shopifyApps} Shopify App Store apps, and a further catalogue built for employers — not a list of things I have read about. Grouped by where each sits in a system, with no self-scored percentages, because shipped work is the only useful measure.`}
+>
+  {
+    /* Marketplace authorship — evidence first, tooling second. Every figure is
+      derived from the projects catalogue, so it cannot drift. */
+  }
+  <Section spacing="md">
+    <ul class="grid gap-4 sm:grid-cols-2" data-reveal-group="90">
+      <li class="author-card rounded-2xl glass p-5 shadow-soft sm:p-6" data-reveal="slide">
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-border-base bg-bg-inset text-[#82B541]"
+            aria-hidden="true"
+          >
+            <Icon name="simple-icons:envato" width={19} height={19} />
+          </span>
+          <div>
+            <h2 class="font-display text-lg font-semibold">CodeCanyon author</h2>
+            <p class="text-xs text-text-dim">Envato marketplace</p>
+          </div>
+        </div>
+
+        <p class="mt-4 text-sm leading-relaxed text-text-muted">
+          {
+            `Author of ${authorship.codecanyon.products} self-published applications on CodeCanyon — invoicing, helpdesk, email marketing, library and restaurant systems — built in PHP, Laravel and Flutter, sold and supported worldwide.`
+          }
+        </p>
+
+        <p class="mt-3 text-sm leading-relaxed text-text-muted">
+          {
+            `A further catalogue was built under the ${authorship.employer.account} author account during that role, including ${authorship.employer.headline} at ${authorship.employer.headlineSales} sales.`
+          }
+        </p>
+
+        <dl class="mt-5 grid grid-cols-3 gap-2 border-t border-border-base pt-4">
+          <div>
+            <dd class="font-display text-lg font-semibold text-[var(--primary)]">
+              {authorship.codecanyon.products}
+            </dd><dt class="text-[0.7rem] text-text-dim">Products</dt>
+          </div>
+          <div>
+            <dd class="font-display text-lg font-semibold text-[var(--primary)]">
+              {authorship.codecanyon.sales}
+            </dd><dt class="text-[0.7rem] text-text-dim">Sales</dt>
+          </div>
+          <div>
+            <dd class="font-display text-lg font-semibold text-[var(--primary)]">
+              {authorship.codecanyon.reviews}
+            </dd><dt class="text-[0.7rem] text-text-dim">Reviews</dt>
+          </div>
+        </dl>
+      </li>
+
+      <li class="author-card rounded-2xl glass p-5 shadow-soft sm:p-6" data-reveal="slide">
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-border-base bg-bg-inset text-[#5E8E3E]"
+            aria-hidden="true"
+          >
+            <Icon name="simple-icons:shopify" width={19} height={19} />
+          </span>
+          <div>
+            <h2 class="font-display text-lg font-semibold">Shopify app developer</h2>
+            <p class="text-xs text-text-dim">Shopify App Store</p>
+          </div>
+        </div>
+
+        <p class="mt-4 text-sm leading-relaxed text-text-muted">
+          {
+            `${shopifyApps} public apps published on the Shopify App Store — email marketing automation and customer feedback collection — built against the Admin and Storefront APIs, handling rate limits, webhook reliability and merchant data sync.`
+          }
+        </p>
+
+        <dl class="mt-5 grid grid-cols-3 gap-2 border-t border-border-base pt-4">
+          <div>
+            <dd class="font-display text-lg font-semibold text-[var(--primary)]">
+              {shopifyApps}
+            </dd><dt class="text-[0.7rem] text-text-dim">Public apps</dt>
+          </div>
+          <div>
+            <dd class="font-display text-lg font-semibold text-[var(--primary)]">Admin</dd><dt
+              class="text-[0.7rem] text-text-dim"
+            >
+              + Storefront API
+            </dt>
+          </div>
+          <div>
+            <dd class="font-display text-lg font-semibold text-[var(--primary)]">Live</dd><dt
+              class="text-[0.7rem] text-text-dim"
+            >
+              On the store
+            </dt>
+          </div>
+        </dl>
+      </li>
+    </ul>
+
+    <a
+      href="/projects"
+      class="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--primary)]"
+      data-reveal="fade"
+    >
+      Browse every product
+      <Icon name="lucide:arrow-right" width={15} height={15} aria-hidden="true" />
+    </a>
+  </Section>
+
+  <Section spacing="md">
+    <div class="grid gap-4 lg:grid-cols-2" data-reveal-group="90">
+      {
+        skillGroups.map((group) => (
+          <section
+            class="skill-group rounded-2xl glass p-5 shadow-soft sm:p-6"
+            style={`--group-accent:${group.accent}`}
+            data-reveal="slide"
+            aria-labelledby={`skills-${group.id}`}
+          >
+            <header class="flex items-start gap-4">
+              <span
+                class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-border-base bg-bg-inset text-[var(--group-accent)]"
+                aria-hidden="true"
+              >
+                <Icon name={group.icon} width={19} height={19} />
+              </span>
+              <div>
+                <h2 id={`skills-${group.id}`} class="font-display text-lg font-semibold sm:text-xl">
+                  {group.title}
+                </h2>
+                <p class="mt-1 text-sm leading-relaxed text-text-muted">{group.description}</p>
+              </div>
+            </header>
+
+            <ul class="mt-6 flex flex-wrap gap-2">
+              {group.skills.map((skill) => (
+                <li class="skill-chip flex items-center gap-2 rounded-full border border-border-base bg-bg-inset/70 px-3 py-1.5">
+                  <Icon
+                    name={skill.icon}
+                    width={15}
+                    height={15}
+                    class="text-text-dim"
+                    aria-hidden="true"
+                  />
+                  <span class="text-[0.8rem] font-medium">{skill.name}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </Section>
+
+  <CallToAction />
+</PageLayout>
+
+<style>
+  .author-card {
+    transition:
+      transform 0.5s var(--ease-out-expo),
+      border-color 0.5s var(--ease-out-expo);
+  }
+
+  .author-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--primary) 32%, transparent);
+  }
+
+  .skill-chip {
+    transition:
+      border-color 0.3s var(--ease-out-expo),
+      background-color 0.3s var(--ease-out-expo);
+  }
+
+  .skill-group:hover .skill-chip {
+    border-color: color-mix(in oklab, var(--group-accent) 30%, transparent);
+    background-color: color-mix(in oklab, var(--group-accent) 8%, transparent);
+  }
+
+  .skill-group {
+    transition:
+      transform 0.5s var(--ease-out-expo),
+      border-color 0.5s var(--ease-out-expo);
+  }
+
+  .skill-group:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--group-accent) 35%, transparent);
+  }
+</style>

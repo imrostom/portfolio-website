@@ -1,0 +1,97 @@
+---
+/**
+ * Fixed ambient background: a subtle grid, three drifting aurora blobs and a
+ * vignette. Entirely decorative and pointer-transparent, so it never interferes
+ * with interaction or the accessibility tree.
+ */
+---
+
+<div class="site-backdrop" aria-hidden="true">
+  <div class="site-backdrop__grid"></div>
+  <div class="site-backdrop__aurora site-backdrop__aurora--one"></div>
+  <div class="site-backdrop__aurora site-backdrop__aurora--two"></div>
+  <div class="site-backdrop__aurora site-backdrop__aurora--three"></div>
+  <div class="site-backdrop__vignette"></div>
+</div>
+
+<style>
+  .site-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: var(--bg);
+  }
+
+  .site-backdrop__grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    /* Fade the grid out toward the bottom so it reads as texture, not a table. */
+    -webkit-mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  .site-backdrop__aurora {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(100px);
+    opacity: calc(var(--glow-opacity) * 0.45);
+    will-change: transform;
+  }
+
+  .site-backdrop__aurora--one {
+    top: -14rem;
+    left: -8rem;
+    width: 40rem;
+    height: 40rem;
+    background: radial-gradient(circle, var(--primary), transparent 68%);
+    animation: aurora 20s ease-in-out infinite alternate;
+  }
+
+  .site-backdrop__aurora--two {
+    top: 12%;
+    right: -12rem;
+    width: 34rem;
+    height: 34rem;
+    background: radial-gradient(circle, var(--secondary), transparent 68%);
+    animation: aurora 26s ease-in-out infinite alternate-reverse;
+  }
+
+  .site-backdrop__aurora--three {
+    bottom: -16rem;
+    left: 28%;
+    width: 38rem;
+    height: 38rem;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    animation: aurora 32s ease-in-out infinite alternate;
+  }
+
+  .site-backdrop__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 90% 60% at 50% 0%, transparent 30%, var(--bg) 92%);
+  }
+
+  /* The blobs are large and blurred; on small screens they cost more than they
+     add, so trim them back. */
+  @media (max-width: 640px) {
+    .site-backdrop__aurora {
+      filter: blur(70px);
+      opacity: calc(var(--glow-opacity) * 0.3);
+    }
+    .site-backdrop__aurora--three {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-backdrop__aurora {
+      animation: none;
+    }
+  }
+</style>

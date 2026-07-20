@@ -1,0 +1,27 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<button
+  type="button"
+  data-back-to-top
+  class="back-to-top no-print fixed right-5 bottom-5 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border-base bg-surface text-text shadow-soft backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lift sm:right-8 sm:bottom-8"
+  aria-label="Back to top"
+>
+  <Icon name="lucide:arrow-up" width={17} height={17} aria-hidden="true" />
+</button>
+
+<style>
+  .back-to-top {
+    opacity: 0;
+    translate: 0 12px;
+    /* Keep it out of the tab order until it is actually on screen. */
+    visibility: hidden;
+  }
+
+  .back-to-top[data-visible] {
+    opacity: 1;
+    translate: 0 0;
+    visibility: visible;
+  }
+</style>

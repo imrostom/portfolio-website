@@ -1,0 +1,29 @@
+{
+  "name": "Md Rostom Ali — Senior Full Stack Engineer",
+  "short_name": "Rostom Ali",
+  "description": "Portfolio of Md Rostom Ali, Senior Full Stack Engineer building scalable SaaS platforms, AI-powered products and high-performance backend systems.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#f4f7fb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

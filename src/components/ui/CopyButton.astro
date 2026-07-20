@@ -1,0 +1,62 @@
+---
+import { Icon } from 'astro-icon/components';
+import { cn } from '../../utils/cn';
+
+interface Props {
+  /** Text placed on the clipboard. */
+  value: string;
+  /** Describes what is copied, for screen readers. */
+  label: string;
+  class?: string;
+}
+
+const { value, label, class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  class={cn(
+    'copy-btn group/copy relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+    'border border-border-base text-text-muted transition-colors duration-300',
+    'hover:border-border-strong hover:bg-surface hover:text-text',
+    className,
+  )}
+  data-copy={value}
+  aria-label={`Copy ${label}`}
+>
+  <Icon name="lucide:copy" width={15} height={15} class="copy-btn__idle" aria-hidden="true" />
+  <Icon
+    name="lucide:check"
+    width={15}
+    height={15}
+    class="copy-btn__done text-emerald-500"
+    aria-hidden="true"
+  />
+  {/* Copy confirmation is announced politely rather than shown only visually. */}
+  <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+</button>
+
+<style>
+  .copy-btn__idle,
+  .copy-btn__done {
+    position: absolute;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s var(--ease-spring);
+  }
+
+  .copy-btn__done {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .copy-btn[data-copied] .copy-btn__idle {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .copy-btn[data-copied] .copy-btn__done {
+    opacity: 1;
+    transform: scale(1);
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+import { cn } from '../../utils/cn';
+
+interface Props {
+  value: number;
+  suffix?: string;
+  prefix?: string;
+  /** Milliseconds for the count-up. */
+  duration?: number;
+  class?: string;
+}
+
+const { value, suffix = '', prefix = '', duration = 1800, class: className } = Astro.props;
+---
+
+{
+  /*
+  The final value is rendered server-side inside the element, so the number is
+  correct for search engines, print and no-JS visitors. The count-up script
+  replaces the text only once the element scrolls into view.
+*/
+}
+<span
+  class={cn('tabular-nums', className)}
+  data-counter
+  data-counter-value={value}
+  data-counter-duration={duration}
+  data-counter-prefix={prefix}
+  data-counter-suffix={suffix}>{prefix}{value}{suffix}</span
+>

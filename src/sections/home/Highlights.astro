@@ -1,0 +1,100 @@
+---
+import { Icon } from 'astro-icon/components';
+import { highlights } from '../../data/site';
+import Section from '../../components/ui/Section.astro';
+import SectionHeading from '../../components/ui/SectionHeading.astro';
+
+/**
+ * The three things a tech-stack list doesn't convey: that the SaaS work was led
+ * rather than just contributed to, that the commerce work includes Shopify apps,
+ * and that the commercial products reached a real international market.
+ */
+---
+
+<Section tinted spacing="md" aria-labelledby="highlights-heading">
+  <SectionHeading
+    id="highlights-heading"
+    align="left"
+    eyebrow="Track record"
+    eyebrowIcon="lucide:badge-check"
+    title="Beyond the"
+    titleAccent="stack list"
+    description="Three strands of work that shaped how I build: leading a multi-tenant SaaS at scale, shipping Shopify apps, and selling commercial products to an international market."
+  />
+
+  <ul class="mt-10 grid gap-4 lg:grid-cols-3" data-reveal-group="90">
+    {
+      highlights.map((item) => (
+        <li
+          class="highlight-card group/hl relative flex flex-col overflow-hidden rounded-2xl glass p-5 sm:p-6"
+          data-reveal="slide"
+        >
+          <span
+            class="highlight-card__icon grid h-11 w-11 place-items-center rounded-2xl border border-border-base bg-bg-inset text-text-muted transition-all duration-500"
+            aria-hidden="true"
+          >
+            <Icon name={item.icon} width={19} height={19} />
+          </span>
+
+          <h3 class="mt-5 font-display text-lg font-semibold">{item.title}</h3>
+
+          <p class="mt-2 flex-1 text-sm leading-relaxed text-text-muted">{item.description}</p>
+
+          {/* The number is the payload — keep it visually distinct from the prose. */}
+          <p class="mt-5 flex items-baseline gap-2 border-t border-border-base pt-4">
+            <span class="font-display text-xl font-semibold text-[var(--primary)]">
+              {item.metric}
+            </span>
+            <span class="text-xs text-text-dim">{item.metricLabel}</span>
+          </p>
+
+          <span
+            class="highlight-card__bloom pointer-events-none absolute -top-16 -right-16 h-32 w-32 rounded-full"
+            aria-hidden="true"
+          />
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .highlight-card {
+    transition:
+      transform 0.5s var(--ease-out-expo),
+      border-color 0.5s var(--ease-out-expo);
+  }
+
+  .highlight-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--primary) 32%, transparent);
+  }
+
+  .highlight-card:hover .highlight-card__icon {
+    border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+    background-color: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--primary);
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  .highlight-card__bloom {
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--primary) 26%, transparent),
+      transparent 68%
+    );
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out-expo);
+  }
+
+  .highlight-card:hover .highlight-card__bloom {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .highlight-card:hover,
+    .highlight-card:hover .highlight-card__icon {
+      transform: none;
+    }
+  }
+</style>
