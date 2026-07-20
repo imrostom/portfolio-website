@@ -13,27 +13,46 @@ import portrait from '../assets/md-rostom-ali-senior-full-stack-engineer.png';
  * JavaScript. See the comment in Hero.astro where it is used.
  *
  * Ported from the CodeWindow illustration this replaces: the floating tech
- * badges keep their original depths and delays, so the parallax and float
- * rhythm are unchanged — only their positions moved from a rectangle's corners
- * onto the circle's circumference.
+ * badges keep their original depth range and float rhythm, so the parallax feel
+ * is unchanged — only their positions moved from a rectangle's corners onto the
+ * circle's circumference.
+ *
+ * `angle` is degrees clockwise from top dead centre. The list is ordered by
+ * angle so the ring reads as a sequence rather than a scatter; the sequence
+ * starts at 18° so nothing lands on 0° and crowds the top of the head.
+ * Colours are the vendors' own brand hexes — simple-icons paths are monochrome
+ * and inherit `currentColor`, so setting `color` on the badge tints the glyph.
+ * React and PHP use each vendor's light-background variant rather than the
+ * simple-icons default (#61DAFB, #8892BF): the site is light-only and those two
+ * all but vanish against the near-white glass badge.
  */
 const floatingIcons = [
-  { icon: 'simple-icons:laravel', class: 'top-[4%] -left-3 sm:-left-5', depth: 26, delay: '0s' },
-  {
-    icon: 'simple-icons:nodedotjs',
-    class: 'top-[24%] -right-3 sm:-right-5',
-    depth: 34,
-    delay: '1.1s',
-  },
-  { icon: 'simple-icons:vuedotjs', class: 'bottom-[4%] left-[18%]', depth: 22, delay: '2.2s' },
-  {
-    icon: 'simple-icons:docker',
-    class: 'bottom-[26%] -left-4 sm:-left-6',
-    depth: 30,
-    delay: '0.6s',
-  },
-  { icon: 'simple-icons:redis', class: '-top-3 right-[18%]', depth: 18, delay: '1.7s' },
+  { icon: 'simple-icons:react', angle: 18, color: '#087EA4', depth: 34, delay: '0s' },
+  { icon: 'simple-icons:nodedotjs', angle: 54, color: '#5FA04E', depth: 26, delay: '1.1s' },
+  { icon: 'simple-icons:laravel', angle: 90, color: '#FF2D20', depth: 30, delay: '2.2s' },
+  { icon: 'simple-icons:php', angle: 126, color: '#777BB4', depth: 22, delay: '0.6s' },
+  { icon: 'simple-icons:mysql', angle: 162, color: '#00758F', depth: 34, delay: '1.7s' },
+  { icon: 'simple-icons:docker', angle: 198, color: '#2496ED', depth: 26, delay: '2.8s' },
+  { icon: 'simple-icons:redis', angle: 234, color: '#FF4438', depth: 18, delay: '0.3s' },
+  { icon: 'simple-icons:googlecloud', angle: 270, color: '#4285F4', depth: 30, delay: '1.4s' },
+  { icon: 'simple-icons:digitalocean', angle: 306, color: '#0080FF', depth: 22, delay: '2.5s' },
+  { icon: 'simple-icons:vuedotjs', angle: 342, color: '#41B883', depth: 34, delay: '0.9s' },
 ];
+
+/*
+  Badge centres sit exactly on the circumference — half in, half out — which is
+  where the hand-placed offsets they replace already put them. The medallion is
+  square, so 50% of the box is the radius on both axes and one percentage pair
+  works at every breakpoint. `translate: -50% -50%` on the badge recentres it;
+  the parallax offset is composed onto that same property in CSS.
+*/
+const place = (angle: number) => {
+  const rad = (angle * Math.PI) / 180;
+  return {
+    left: `${(50 + 50 * Math.sin(rad)).toFixed(3)}%`,
+    top: `${(50 - 50 * Math.cos(rad)).toFixed(3)}%`,
+  };
+};
 
 /*
   Every width is well under the 1254px source, so Astro never has to fall back —
@@ -83,16 +102,19 @@ const widths = [320, 448, 640, 896];
   </div>
 
   {
-    floatingIcons.map((item) => (
-      <span
-        class={`floating-icon glass absolute z-10 grid h-11 w-11 place-items-center rounded-2xl shadow-soft sm:h-13 sm:w-13 ${item.class}`}
-        style={`--float-delay:${item.delay}`}
-        data-parallax={item.depth}
-        aria-hidden="true"
-      >
-        <Icon name={item.icon} width={20} height={20} class="text-text-muted" />
-      </span>
-    ))
+    floatingIcons.map((item) => {
+      const { left, top } = place(item.angle);
+      return (
+        <span
+          class="floating-icon glass absolute z-10 grid h-10 w-10 place-items-center rounded-2xl shadow-soft sm:h-12 sm:w-12"
+          style={`--float-delay:${item.delay};left:${left};top:${top};color:${item.color}`}
+          data-parallax={item.depth}
+          aria-hidden="true"
+        >
+          <Icon name={item.icon} width={20} height={20} />
+        </span>
+      );
+    })
   }
 </div>
 
@@ -146,8 +168,14 @@ const widths = [320, 448, 640, 896];
     }
   }
 
+  /*
+    The -50% pair recentres the badge on the point its inline left/top places on
+    the circumference; the parallax offset rides on top of it. Both have to live
+    in one `translate` — a second declaration would overwrite the first, not
+    compose with it, and the badges would hang off their anchor points.
+  */
   .floating-icon {
-    translate: var(--parallax-x, 0) var(--parallax-y, 0);
+    translate: calc(-50% + var(--parallax-x, 0px)) calc(-50% + var(--parallax-y, 0px));
     animation: float 7s ease-in-out infinite;
     animation-delay: var(--float-delay, 0s);
     transition: translate 0.5s var(--ease-out-expo);
