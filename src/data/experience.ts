@@ -11,6 +11,20 @@ export type Experience = {
   highlights: string[];
   stack: string[];
   icon: string;
+  /**
+   * Brand hex for the timeline node — tints the glyph, its ring and its soft
+   * background fill. Omit and the node falls back to the neutral grey style.
+   * The `current` role ignores this: it keeps the site's brand gradient fill.
+   */
+  accent?: string;
+  /** Company website, if public. Renders the company name as an external link. */
+  website?: string;
+  /**
+   * Logo filename in `src/assets/companies/`, resolved through
+   * `getCompanyLogo()`. Omit when there is no logo to show — the card falls
+   * back to the timeline node's lucide glyph, which every role already has.
+   */
+  logo?: string;
 };
 
 export const experiences: Experience[] = [
@@ -34,6 +48,8 @@ export const experiences: Experience[] = [
     ],
     stack: ['Node.js', 'Nuxt', 'Vue', 'TypeScript', 'MySQL', 'Redis', 'Docker', 'AWS'],
     icon: 'lucide:truck',
+    website: 'https://tixpi.ch/de',
+    logo: 'tixpi-logistics-moving-company-logo.png',
   },
   {
     id: 'wpdeveloper',
@@ -55,6 +71,9 @@ export const experiences: Experience[] = [
     ],
     stack: ['Laravel', 'PHP', 'Vue', 'Shopify', 'MySQL', 'Redis', 'AWS', 'Nginx'],
     icon: 'lucide:layers',
+    accent: '#E9388B',
+    website: 'https://wpdeveloper.com/',
+    logo: 'wpdeveloper-wordpress-plugin-company-logo.png',
   },
   {
     id: 'inilabs',
@@ -74,6 +93,9 @@ export const experiences: Experience[] = [
     ],
     stack: ['Laravel', 'PHP', 'jQuery', 'MySQL', 'Bootstrap'],
     icon: 'lucide:package',
+    accent: '#2D9CDB',
+    website: 'https://inilabs.net/',
+    logo: 'inilabs-software-company-logo.png',
   },
 ];
 

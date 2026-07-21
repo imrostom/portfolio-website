@@ -206,6 +206,38 @@ npm run build && npm run preview
 Before going live, set the production domain in `astro.config.mjs` (`SITE`) and in
 `src/data/site.ts` (`site.url`).
 
+### The host must try the `.html` extension
+
+`build.format: 'file'` pairs with `trailingSlash: 'never'`, so the output is flat —
+`dist/projects.html`, **not** `dist/projects/index.html`. A host that only tries `$uri` and
+`$uri/` will miss every route and fall through to whatever its fallback is; if that fallback is
+`/index.html`, every URL silently renders the homepage.
+
+Netlify and Vercel resolve this automatically. nginx needs `$uri.html` in the chain:
+
+```nginx
+root /var/www/rostomali.online/dist;
+index index.html;
+
+# trailingSlash: 'never' — one canonical URL per page
+rewrite ^/(.*)/$ /$1 permanent;
+
+error_page 404 /404.html;
+
+location / {
+    try_files $uri $uri.html $uri/ =404;
+}
+```
+
+`=404` rather than `/404.html` as the fallback: paired with `error_page`, it serves the 404 page
+with a real 404 status. Using `/404.html` directly would serve that page at 200 and tell crawlers
+the URL is valid.
+
+Apache needs `Options +MultiViews`, or an equivalent `RewriteRule`.
+
+Note that `npm run preview` does **not** catch this — Astro's preview server resolves
+`format: 'file'` routes itself, so it passes even against a server config that would fail.
+
 ## Licence
 
 Source code MIT. Written content, résumé and personal branding are © Md Rostom Ali.

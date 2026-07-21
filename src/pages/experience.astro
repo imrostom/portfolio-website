@@ -1,5 +1,6 @@
 ---
 import { Icon } from 'astro-icon/components';
+import { Image } from 'astro:assets';
 import PageLayout from '../layouts/PageLayout.astro';
 import Section from '../components/ui/Section.astro';
 import Timeline from '../components/Timeline.astro';
@@ -7,6 +8,7 @@ import Badge from '../components/ui/Badge.astro';
 import Button from '../components/ui/Button.astro';
 import CallToAction from '../sections/CallToAction.astro';
 import { experiences } from '../data/experience';
+import { getCompanyLogo } from '../utils/companyLogos';
 import { profilePageSchema } from '../utils/seo';
 import { site } from '../data/site';
 
@@ -27,7 +29,27 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
   <Section spacing="md">
     <Timeline>
       {
-        experiences.map((job) => (
+        experiences.map((job) => {
+          const logo = getCompanyLogo(job.id);
+          // Fit each logo into a 40px-tall, 150px-wide box, preserving its own
+          // aspect ratio. Short marks (Tixpi ~1.5:1) fill the height; very wide
+          // wordmarks (WPDeveloper ~6.4:1) hit the width cap and get shorter
+          // instead of overrunning the header. The emitted image is sized to
+          // exactly what renders, so there is no layout shift.
+          const LOGO_MAX_H = 40;
+          const LOGO_MAX_W = 150;
+          let logoWidth = 0;
+          let logoHeight = 0;
+          if (logo) {
+            const ratio = logo.width / logo.height;
+            logoWidth = Math.round(LOGO_MAX_H * ratio);
+            logoHeight = LOGO_MAX_H;
+            if (logoWidth > LOGO_MAX_W) {
+              logoWidth = LOGO_MAX_W;
+              logoHeight = Math.round(LOGO_MAX_W / ratio);
+            }
+          }
+          return (
           <li class="relative pb-9 pl-11 last:pb-0 md:pl-16" data-reveal="slide">
             {/* Rail node — the current role gets a pulsing ring */}
             <span
@@ -35,8 +57,11 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
                 'exp-node absolute top-1 left-0 grid h-8 w-8 place-items-center rounded-full border text-white md:h-10 md:w-10',
                 job.current
                   ? 'exp-node--current border-transparent brand-fill'
-                  : 'border-border-strong bg-bg text-text-muted',
+                  : job.accent
+                    ? 'exp-node--tinted border-transparent'
+                    : 'border-border-strong bg-bg text-text-muted',
               ]}
+              style={!job.current && job.accent ? `--exp-accent:${job.accent}` : undefined}
               aria-hidden="true"
             >
               <Icon name={job.icon} width={15} height={15} />
@@ -55,7 +80,25 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
                   </div>
 
                   <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
-                    <span class="font-medium text-[var(--primary)]">{job.company}</span>
+                    {job.website ? (
+                      <a
+                        href={job.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group/co inline-flex items-center gap-1 font-medium text-[var(--primary)] transition-colors hover:text-[var(--accent)]"
+                      >
+                        {job.company}
+                        <Icon
+                          name="lucide:arrow-up-right"
+                          width={12}
+                          height={12}
+                          class="opacity-60 transition-transform group-hover/co:-translate-y-0.5 group-hover/co:translate-x-0.5"
+                          aria-hidden="true"
+                        />
+                      </a>
+                    ) : (
+                      <span class="font-medium text-[var(--primary)]">{job.company}</span>
+                    )}
                     <span class="flex items-center gap-1.5">
                       <Icon name="lucide:map-pin" width={13} height={13} aria-hidden="true" />
                       {job.location}
@@ -63,10 +106,30 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
                   </p>
                 </div>
 
-                <p class="flex items-center gap-1.5 font-mono text-xs whitespace-nowrap text-text-dim">
-                  <Icon name="lucide:calendar" width={13} height={13} aria-hidden="true" />
-                  {job.period}
-                </p>
+                <div class="flex flex-col items-end gap-2.5">
+                  {logo && (
+                    <a
+                      href={job.website ?? undefined}
+                      target={job.website ? '_blank' : undefined}
+                      rel={job.website ? 'noopener noreferrer' : undefined}
+                      class="shrink-0"
+                      aria-label={`${job.company} website`}
+                    >
+                      <Image
+                        src={logo}
+                        alt={`${job.company} logo`}
+                        width={logoWidth}
+                        height={logoHeight}
+                        loading="lazy"
+                        class="block h-auto w-auto"
+                      />
+                    </a>
+                  )}
+                  <p class="flex items-center gap-1.5 font-mono text-xs whitespace-nowrap text-text-dim">
+                    <Icon name="lucide:calendar" width={13} height={13} aria-hidden="true" />
+                    {job.period}
+                  </p>
+                </div>
               </header>
 
               <p class="mt-4 text-sm leading-relaxed text-text-muted sm:text-base">{job.summary}</p>
@@ -100,7 +163,8 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
               </ul>
             </article>
           </li>
-        ))
+          );
+        })
       }
     </Timeline>
 
@@ -123,6 +187,18 @@ const origin = Astro.site ?? new URL(Astro.url.origin);
 <style>
   .exp-node {
     box-shadow: 0 0 0 4px var(--bg);
+  }
+
+  /* Brand-tinted node for past roles: the glyph takes the company accent, over a
+     soft wash of the same hue, with a colour-matched ring and glow. Keeps the
+     4px --bg ring from .exp-node so the rail line still reads behind it. */
+  .exp-node--tinted {
+    color: var(--exp-accent);
+    background: color-mix(in oklab, var(--exp-accent) 14%, var(--bg));
+    border-color: color-mix(in oklab, var(--exp-accent) 40%, transparent);
+    box-shadow:
+      0 0 0 4px var(--bg),
+      0 6px 16px -8px color-mix(in oklab, var(--exp-accent) 65%, transparent);
   }
 
   /* Pulsing halo marks the current role without relying on colour alone —
